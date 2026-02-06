@@ -3,7 +3,24 @@ server <- function(input, output, session) {
   observe({
     jsonPath <- Sys.getenv("jsonPath")
     results <- DataQualityDashboard::convertJsonResultsFileCase(jsonPath, writeToFile = FALSE, targetCase = "camel")
-    results <- jsonlite::parse_json(jsonlite::toJSON(results))
+    
+    # Read checkDescription to get Severity status
+    cdmVersion <- results$Metadata$cdmVersion
+    checkDescriptionsDf <- readr::read_csv(
+      file = system.file(
+        "csv",
+        sprintf("OMOP_CDMv%s_Check_Descriptions.csv", cdmVersion),  
+        package = "DataQualityDashboard"
+      ),
+      show_col_types = FALSE
+    )
+
+    results$CheckResults <- results$CheckResults |>
+      dplyr::left_join(
+        dplyr::select(checkDescriptionsDf, checkName, severity),
+        dplyr::join_by('checkName')
+      )
+    
     session$sendCustomMessage("results", results)
   })
 }
