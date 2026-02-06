@@ -9,7 +9,7 @@ server <- function(input, output, session) {
     checkDescriptionsDf <- readr::read_csv(
       file = system.file(
         "csv",
-        sprintf("OMOP_CDMv%s_Check_Descriptions.csv", cdmVersion),  
+        sprintf("OMOP_CDMv%s_Check_Descriptions.csv", substr(cdmVersion, 1, 3)),  
         package = "DataQualityDashboard"
       ),
       show_col_types = FALSE
@@ -21,6 +21,11 @@ server <- function(input, output, session) {
         dplyr::join_by('checkName')
       )
     
+    results$appVersion <- as.character(packageVersion('DataQualityDashboard'))
+    
+    # Fix json formatting
+    results <- jsonlite::parse_json(jsonlite::toJSON(results))    
+
     session$sendCustomMessage("results", results)
   })
 }

@@ -5,6 +5,7 @@ function loadResults(results) {
     var metadata = results.Metadata[0];
     $('cdm-source-name').text(metadata.cdmSourceName);
     $('dq-metadata').attr('data-results', JSON.stringify(metadata));
+    $('#appVersion').text(results.appVersion);
 
     function format(d) {
         errorMessage = '';
