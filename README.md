@@ -81,7 +81,13 @@ Installation
 =============
 1. See the instructions [here](https://ohdsi.github.io/Hades/rSetup.html) for configuring your R environment, including RTools and Java.
 
-2. In R, use the following commands to download and install DataQualityDashboard:
+2. In R, install DataQualityDashboard from CRAN:
+
+  ```r
+  install.packages("DataQualityDashboard")
+  ```
+
+   To install from GitHub instead:
 
   ```r
   install.packages("remotes")
