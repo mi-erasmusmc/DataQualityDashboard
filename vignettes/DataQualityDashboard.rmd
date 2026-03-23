@@ -18,6 +18,14 @@ vignette: >
 R Installation
 ===============
 
+Install from CRAN:
+
+```r
+install.packages("DataQualityDashboard")
+```
+
+To install from GitHub:
+
 ```r
 install.packages("remotes")
 remotes::install_github("OHDSI/DataQualityDashboard")
