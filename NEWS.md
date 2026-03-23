@@ -1,3 +1,7 @@
+DataQualityDashboard 2.8.7
+==========================
+This release contains a bugfix for an issue in calculation of the "Not Applicable" status, which caused errors to be thrown in some scenarios.  More missing plausible units were also added to the `plausibleUnitConceptIds` check.
+
 DataQualityDashboard 2.8.6
 ==========================
 This release contains minor changes needed to support CRAN submission.
