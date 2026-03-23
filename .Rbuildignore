@@ -17,3 +17,5 @@ output/
 ^vignettes/checks$
 ^vignettes/checkIndex\.Rmd$
 ^sql$
+^CRAN-SUBMISSION$
+^cran-comments\.md$
