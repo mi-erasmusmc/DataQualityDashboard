@@ -278,6 +278,7 @@ test_that("Execute a single DQ check on a cohort in Synthea/Eunomia", {
 })
 
 test_that("Execute a single DQ check on remote databases", {
+  skip_on_cran()
   outputFolder <- tempfile("dqd_")
   on.exit(unlink(outputFolder, recursive = TRUE))
 

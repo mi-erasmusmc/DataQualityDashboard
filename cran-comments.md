@@ -1,5 +1,6 @@
-## R CMD check results
+This is a resubmission of a previously archived package.
 
-0 errors | 0 warnings | 0 notes
+The package was archived due to internet calls timing out in testthat tests.
+This has been fixed by removing those calls for CRAN runs.
 
-* This is a maintenance release.
+All checks now pass locally and on CI.
