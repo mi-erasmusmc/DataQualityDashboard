@@ -55,7 +55,9 @@ if (sqlFile == "") {
   stop("Cannot find SQL files. Make sure the package is properly loaded.")
 }
 
-if (Sys.getenv("DONT_DOWNLOAD_JDBC_DRIVERS", "") == "TRUE") {
+if (!identical(Sys.getenv("NOT_CRAN"), "true")) {
+  jdbcDriverFolder <- ""
+} else if (Sys.getenv("DONT_DOWNLOAD_JDBC_DRIVERS", "") == "TRUE") {
   jdbcDriverFolder <- Sys.getenv("DATABASECONNECTOR_JAR_FOLDER")
 } else {
   jdbcDriverFolder <- tempfile("jdbcDrivers")
