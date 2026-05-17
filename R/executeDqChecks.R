@@ -280,6 +280,12 @@ executeDqChecks <- function(connectionDetails,
 
   checkDescriptions <- split(checkDescriptionsDf, seq_len(nrow(checkDescriptionsDf)))
 
+  # set up connection for single vs. multi-threaded execution
+  connection <- NULL
+  if (numThreads == 1 && !sqlOnly) {
+    connection <- DatabaseConnector::connect(connectionDetails = connectionDetails)
+  }
+
   fieldChecks$cdmFieldName <- toupper(fieldChecks$cdmFieldName)
   conceptChecks$cdmFieldName <- toupper(conceptChecks$cdmFieldName)
 
