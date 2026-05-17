@@ -443,7 +443,7 @@ MEASUREMENT,MEASUREMENT_CONCEPT_ID,4008265,Total cholesterol measurement,,,,,,,,
 MEASUREMENT,MEASUREMENT_CONCEPT_ID,36303797,"Glomerular filtration rate/1.73 sq M.predicted among non-blacks [Volume Rate/Area] in Serum, Plasma or Blood by Creatinine-based formula (CKD-EPI)",,,,,,,,,,,,,,,,,,,,,,,"720870,8795",5,Approved UNIT_CONCEPT_IDs for the given MEASUREMENT_CONCEPT_ID
 MEASUREMENT,MEASUREMENT_CONCEPT_ID,37398460,Serum alkaline phosphatase level,,,,,,,,,,,,,,,,,,,,,,,"32995,8645,8923",5,Approved UNIT_CONCEPT_IDs for the given MEASUREMENT_CONCEPT_ID
 MEASUREMENT,MEASUREMENT_CONCEPT_ID,3013682,Urea nitrogen [Mass/volume] in Serum or Plasma,,,,,,,,,,,,,,,,,,,,,,,8840,5,Approved UNIT_CONCEPT_IDs for the given MEASUREMENT_CONCEPT_ID
-MEASUREMENT,MEASUREMENT_CONCEPT_ID,3026361,Erythrocytes [#/volume] in Blood,,,,,,,,,,,,,,,,,,,,,,,"32706,8785,8815,8931",5,Approved UNIT_CONCEPT_IDs for the given MEASUREMENT_CONCEPT_ID
+MEASUREMENT,MEASUREMENT_CONCEPT_ID,3026361,Erythrocytes [#/volume] in Blood,,,,,,,,,,,,,,,,,,,,,,,"32706,8785,8815,8931,8784,8848,8961,9444",5,Approved UNIT_CONCEPT_IDs for the given MEASUREMENT_CONCEPT_ID
 MEASUREMENT,MEASUREMENT_CONCEPT_ID,3027018,Heart rate,,,,,,,,,,,,,,,,,,,,,,,"8483,8541,-1",5,Approved UNIT_CONCEPT_IDs for the given MEASUREMENT_CONCEPT_ID
 MEASUREMENT,MEASUREMENT_CONCEPT_ID,4013965,"Oxygen saturation measurement, arterial",,,,,,,,,,,,,,,,,,,,,,,8554,5,Approved UNIT_CONCEPT_IDs for the given MEASUREMENT_CONCEPT_ID
 MEASUREMENT,MEASUREMENT_CONCEPT_ID,3013429,Basophils [#/volume] in Blood by Automated count,,,,,,,,,,,,,,,,,,,,,,,"8784,8816,8848,8961,9436,9444,8785",5,Approved UNIT_CONCEPT_IDs for the given MEASUREMENT_CONCEPT_ID

@@ -124,10 +124,6 @@ executeDqChecks <- function(connectionDetails,
   )
   stopifnot(is.character(cdmVersion))
 
-  # Warning if check names for determining NA is missing
-  if (length(checkNames) > 0 && !.containsNAchecks(checkNames)) {
-    warning("Missing check names to calculate the 'Not Applicable' status.")
-  }
 
   # temporary patch to work around vroom 1.6.4 bug
   readr::local_edition(1)
@@ -264,6 +260,10 @@ executeDqChecks <- function(connectionDetails,
 
   if (nrow(checkDescriptionsDf) == 0) {
     stop("No checks are available based on excluded tables. Please review tablesToExclude.")
+  }
+
+  if (!.containsNAchecks(checkDescriptionsDf$checkName)) {
+    warning("Missing check names to calculate the 'Not Applicable' status. Results will show pass/fail without Not Applicable status.")
   }
 
   if ("plausibleDuringLife" %in% checkDescriptionsDf$checkName) {
