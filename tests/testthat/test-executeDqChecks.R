@@ -2,6 +2,7 @@ library(testthat)
 testthat::local_edition(3)
 
 test_that("Execute a single DQ check on Synthea/Eunomia", {
+  testthat::skip_if_not_installed("Eunomia")
   outputFolder <- tempfile("dqd_")
   on.exit(unlink(outputFolder, recursive = TRUE))
 
@@ -26,6 +27,7 @@ test_that("Execute a single DQ check on Synthea/Eunomia", {
 })
 
 test_that("Execute all TABLE checks on Synthea/Eunomia", {
+  testthat::skip_if_not_installed("Eunomia")
   outputFolder <- tempfile("dqd_")
   on.exit(unlink(outputFolder, recursive = TRUE))
 
@@ -50,6 +52,7 @@ test_that("Execute all TABLE checks on Synthea/Eunomia", {
 })
 
 test_that("Execute FIELD checks on Synthea/Eunomia", {
+  testthat::skip_if_not_installed("Eunomia")
   outputFolder <- tempfile("dqd_")
   on.exit(unlink(outputFolder, recursive = TRUE))
 
@@ -73,6 +76,7 @@ test_that("Execute FIELD checks on Synthea/Eunomia", {
 })
 
 test_that("Execute CONCEPT checks on Synthea/Eunomia", {
+  testthat::skip_if_not_installed("Eunomia")
   outputFolder <- tempfile("dqd_")
   on.exit(unlink(outputFolder, recursive = TRUE))
   results <- withCallingHandlers(
@@ -100,6 +104,7 @@ test_that("Execute CONCEPT checks on Synthea/Eunomia", {
 })
 
 test_that("Execute observation period overlap check", {
+  testthat::skip_if_not_installed("Eunomia")
   outputFolder <- tempfile("dqd_")
   on.exit(unlink(outputFolder, recursive = TRUE))
 
@@ -236,6 +241,7 @@ test_that("Execute observation period overlap check", {
 })
 
 test_that("Execute a single DQ check on a cohort in Synthea/Eunomia", {
+  testthat::skip_if_not_installed("Eunomia")
   # simulating cohort table entries using observation period data
   connection <- DatabaseConnector::connect(connectionDetailsEunomia)
   on.exit(DatabaseConnector::disconnect(connection), add = TRUE)
@@ -434,6 +440,7 @@ test_that("Execute a single DQ check on remote databases", {
 })
 
 test_that("Check invalid cdm version", {
+  testthat::skip_if_not_installed("Eunomia")
   outputFolder <- tempfile("dqd_")
   on.exit(unlink(outputFolder, recursive = TRUE))
 
@@ -452,6 +459,7 @@ test_that("Check invalid cdm version", {
 })
 
 test_that("Execute DQ checks and write to table", {
+  testthat::skip_if_not_installed("Eunomia")
   outputFolder <- tempfile("dqd_")
   on.exit(unlink(outputFolder, recursive = TRUE))
 
@@ -579,6 +587,7 @@ test_that("Execute DQ checks using sqlOnly=TRUE and sqlOnlyUnionCount=1 and sqlO
 })
 
 test_that("Incremental insert SQL is valid.", {
+  testthat::skip_if_not_installed("Eunomia")
   outputFolder <- tempfile("dqd_")
   on.exit(unlink(outputFolder, recursive = TRUE))
 
@@ -620,6 +629,7 @@ test_that("Incremental insert SQL is valid.", {
 })
 
 test_that("Multiple cdm_source rows triggers warning.", {
+  testthat::skip_if_not_installed("Eunomia")
   outputFolder <- tempfile("dqd_")
   on.exit(unlink(outputFolder, recursive = TRUE))
 
@@ -647,6 +657,7 @@ test_that("Multiple cdm_source rows triggers warning.", {
 })
 
 test_that("Execute checks on Synthea/Eunomia to test new variable executionTimeSeconds", {
+  testthat::skip_if_not_installed("Eunomia")
   outputFolder <- tempfile("dqd_")
   on.exit(unlink(outputFolder, recursive = TRUE))
   results <- withCallingHandlers(
@@ -675,6 +686,7 @@ test_that("Execute checks on Synthea/Eunomia to test new variable executionTimeS
 
 
 test_that("checkNames are filtered by checkSeverity", {
+  testthat::skip_if_not_installed("Eunomia")
   outputFolder <- tempfile("dqd_")
   on.exit(unlink(outputFolder, recursive = TRUE))
 
@@ -703,6 +715,10 @@ test_that("checkNames are filtered by checkSeverity", {
 })
 
 test_that("Execute a single DQ check on DuckDB", {
+  testthat::skip_on_cran()
+  testthat::skip_on_ci()
+  testthat::skip_if_not_installed("Eunomia")
+  testthat::skip_if_not_installed("duckdb")
   outputFolder <- tempfile("dqd_")
   on.exit(unlink(outputFolder, recursive = TRUE))
 
