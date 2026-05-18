@@ -1,3 +1,6 @@
+# DataQualityDashboard 2.8.9 <small class="text-muted">2026-05-17</small>
+This release contains fixes to testthat to comply with CRAN policies.
+
 # DataQualityDashboard 2.8.8 <small class="text-muted">2026-05-17</small>
 This release contains the following fixes and enhancements:
 

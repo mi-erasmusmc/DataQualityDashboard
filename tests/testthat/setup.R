@@ -68,18 +68,20 @@ if (!identical(Sys.getenv("NOT_CRAN"), "true")) {
   DatabaseConnector::downloadJdbcDrivers("redshift", jdbcDriverFolder)
 }
 
-connectionDetailsEunomia <- Eunomia::getEunomiaConnectionDetails()
-cdmDatabaseSchemaEunomia <- "main"
-resultsDatabaseSchemaEunomia <- "main"
+if (requireNamespace("Eunomia", quietly = TRUE)) {
+  connectionDetailsEunomia <- Eunomia::getEunomiaConnectionDetails()
+  cdmDatabaseSchemaEunomia <- "main"
+  resultsDatabaseSchemaEunomia <- "main"
 
-# Separate connection details for NA tests, as this requires removing records
-connectionDetailsEunomiaNaChecks <- Eunomia::getEunomiaConnectionDetails()
+  # Separate connection details for NA tests, as this requires removing records
+  connectionDetailsEunomiaNaChecks <- Eunomia::getEunomiaConnectionDetails()
 
-# Separate connection details for plausibleAfterBirth test
-connectionDetailsPlausibleAfterBirth <- Eunomia::getEunomiaConnectionDetails()
+  # Separate connection details for plausibleAfterBirth test
+  connectionDetailsPlausibleAfterBirth <- Eunomia::getEunomiaConnectionDetails()
 
-# Separate connection details for observation period overlap test
-connectionDetailsEunomiaOverlap <- Eunomia::getEunomiaConnectionDetails()
+  # Separate connection details for observation period overlap test
+  connectionDetailsEunomiaOverlap <- Eunomia::getEunomiaConnectionDetails()
+}
 
 # Helper function to verify database connection
 verifyConnection <- function(connectionDetails) {
