@@ -71,7 +71,7 @@ plotCompareDqdResults <- function(jsonFilePathOld, jsonFilePathNew, outputPath =
   }
   
   # Visualization
-  p <- combinedResult %>%
+  combinedResult %>%
     dplyr::mutate(       
       fail_status = ifelse(
         FAILED.old, 
@@ -111,17 +111,14 @@ plotCompareDqdResults <- function(jsonFilePathOld, jsonFilePathNew, outputPath =
     ggplot2::labs(x="Previous % of row fails", y="Current % of row fails") +
     ggplot2::annotate("text", label="Improved", x = 88.5, y = 12.5, colour="grey") +
     ggplot2::annotate("text", label="Worsened", x = 12.5, y = 88.5, colour="grey")
-  
-  return(p)
 }
 
 
-#' Create table comparing two DQD results
+#' Create table comparing two DQD results.
+#' TODO: add some additional value here. e.g. combine with the join function. The filter is done in plot as well.
 #' 
 #' @param jsonFilePathOld the path to the old DQD json results file
 #' @param jsonFilePathNew the path to the new DQD json results file
-#' @param outputPath (optional) the path to the folder where the output should be written
-#'                  if not given, no output will be written.
 #' 
 #' @author Elena Garcia Lara
 #' @author Maxim Moinat
@@ -133,140 +130,30 @@ plotCompareDqdResults <- function(jsonFilePathOld, jsonFilePathNew, outputPath =
 #' \dontrun{
 #'   tableCompareDqdResults("dqd_results_1.json", "dqd_results_2.json", "output")
 #' }
-tableCompareDqdResults <- function(jsonFilePathOld, jsonFilePathNew, outputPath = NA){
+tableCompareDqdResults <- function(jsonFilePathOld, jsonFilePathNew){
   combinedResult <- .joinDqdResults(jsonFilePathOld, jsonFilePathNew, suffixes = c(".old", ".new"))
   
   # Only keep changed
   combinedResult <- combinedResult %>%
     filter(PCT_VIOLATED_ROWS.old != PCT_VIOLATED_ROWS.new) %>%
-    select(CHECK_NAME, CDM_TABLE_NAME, CDM_FIELD_NAME,
-           CONCEPT_ID, UNIT_CONCEPT_ID,
-           PCT_VIOLATED_ROWS.old, NUM_DENOMINATOR_ROWS.old, FAILED.old,
-           PCT_VIOLATED_ROWS.new, NUM_DENOMINATOR_ROWS.new, FAILED.new,
-           NOTES_VALUE.old, NOTES_VALUE.new)
-  
-  # Save as csv
-  if (!is.na(outputPath)) {
-    saving_name <- file.path(outputPath, paste("compare_dqd", Sys.Date(), sep="_"))
-    dir.create(file.path(outputPath), showWarnings = FALSE)
-    write.csv(combinedResult, file=paste(saving_name, ".csv", sep=""))
-  }
+    select(
+      CHECK_NAME,
+      CDM_TABLE_NAME,
+      CDM_FIELD_NAME,
+      CONCEPT_ID,
+      # UNIT_CONCEPT_ID,
+      PCT_VIOLATED_ROWS.old,
+      NUM_DENOMINATOR_ROWS.old,
+      FAILED.old,
+      PCT_VIOLATED_ROWS.new,
+      NUM_DENOMINATOR_ROWS.new,
+      FAILED.new,
+      NOTES_VALUE.old,
+      NOTES_VALUE.new
+    )
   
   return(combinedResult)
 }
-
-#' Plot concept mapping coverage
-#' 
-#' Finds mapping coverage from a given DQD results file, and returns an accessible figure
-#' If \code{outputPath} is provided, the figure is saved as png.
-#' 
-#' @param jsonPath the path to the DQD json results file
-#' @param outputPath (optional) the path to the folder where plot and data table are written
-#'                  if not given, no output will be saved
-#' 
-#' @import dplyr
-#' @import ggplot2
-#' 
-#' @author Elena Garcia Lara
-#' @author Maxim Moinat
-#' 
-#' @return A figure to visualize concept mapping coverage per domain
-#' @export
-#' 
-#' @examples 
-#' \dontrun{
-#'   plotConceptCoverage("dqd_results.json", "output")
-#' }
-plotConceptCoverage <- function(jsonPath, outputPath = NA){
-  
-  # Load data
-  result <- jsonlite::fromJSON(jsonPath)
-  check_results <- result$CheckResults %>%
-    select(CHECK_NAME, CDM_TABLE_NAME, CDM_FIELD_NAME, 
-           NUM_VIOLATED_ROWS, NUM_DENOMINATOR_ROWS, PCT_VIOLATED_ROWS)
-  
-  coverage_results <- check_results %>%
-    filter(CHECK_NAME %in% c("standardConceptRecordCompleteness", "sourceValueCompleteness")) %>%
-    # Not interested in era's as these are all derived
-    filter(!(CDM_TABLE_NAME %in% c("DRUG_ERA", "DOSE_ERA", "CONDITION_ERA"))) %>%
-    dplyr::mutate(
-      CDM_FIELD_NAME = toupper(CDM_FIELD_NAME),
-      # First check is over all records, second over the unique source terms
-      coverageType = recode(CHECK_NAME, 
-                            standardConceptRecordCompleteness = "Records",
-                            sourceValueCompleteness = "Terms"),
-      # Coverage is rows not failing
-      coveragePct = 1 - PCT_VIOLATED_ROWS,
-      # Naming of domains
-      domain = gsub("_(OCC\\w+|EXP\\w+|PLAN.+)$", "", CDM_TABLE_NAME),
-      variable = ifelse(CHECK_NAME=="standardConceptRecordCompleteness", 
-                        sub('_CONCEPT_ID', '', CDM_FIELD_NAME), 
-                        sub('_SOURCE_VALUE', '', CDM_FIELD_NAME)
-      ),
-      domain_abbrev = recode(domain, 
-                             VISIT = "VST",
-                             CONDITION = "COND",
-                             PROCEDURE = "PROC",
-                             OBSERVATION = "OBS",
-                             MEASUREMENT = "MEAS",
-                             SPECIMEN = "SPEC"
-      ),
-      domainField = ifelse(domain==variable,
-                           domain,
-                           paste0(domain_abbrev,"-",variable)
-      )
-    )
-  
-  # Table
-  table <- coverage_results %>% 
-    dplyr::mutate(
-      percentUnmapped = scales::percent(PCT_VIOLATED_ROWS, accuracy = 0.01),
-      nUnmapped = formatC(NUM_VIOLATED_ROWS, format="d", big.mark=","),
-      nTotal = formatC(NUM_DENOMINATOR_ROWS, format="d", big.mark=",")
-    ) %>%
-    select(domainField, coverageType, percentUnmapped, nUnmapped, nTotal) %>% 
-    arrange(domainField, desc(coverageType))  # by domain, terms first, then records
-  
-  # Coverage plot like fig 6 in EHDEN DoA
-  # note: coverage is percentage NOT failing to map
-  fig <- coverage_results %>%
-    # To keep things simple, we only look at the six main domains and units
-    filter(domainField %in% c("VISIT", "PROCEDURE", "DRUG", "CONDITION", "MEASUREMENT", 
-                              "OBSERVATION", "MEAS-UNIT", "OBS-UNIT"),
-           NUM_DENOMINATOR_ROWS > 0
-    ) %>%
-    dplyr::mutate(
-      coveragePct = 1 - PCT_VIOLATED_ROWS
-    ) %>%
-    ggplot(aes(x=coverageType, y = coveragePct, fill = coverageType)) +
-    geom_col() +
-    geom_text(aes(label=scales::percent(coveragePct, accuracy = 0.01)), 
-              position=position_stack(vjust=0.5), 
-              size=3, colour="gray10", fontface="bold") +
-    theme_minimal() +
-    theme(
-      axis.text.y=element_text(size=10),
-      strip.placement="outside",
-      strip.text.y=element_text(angle=0, hjust=0.5, face="bold", size=6)
-    ) +
-    coord_flip() +
-    facet_grid(domainField ~ ., scales="free_y", space="free_y", switch="y") +
-    guides(fill=FALSE) +
-    ylab("Percentage Coverage (%)") + 
-    xlab("") + 
-    scale_fill_manual(values=c("cornflowerblue", "skyblue"))
-  
-  if (!is.na(outputPath)) {
-    saving_name <- file.path(outputPath, paste("concept_mapping_coverage", Sys.Date(), sep="_"))
-    dir.create(file.path(outputPath), showWarnings = FALSE)
-    ggsave(filename=paste(saving_name, ".png", sep=""), height = 8, width = 8 * 1.61803)
-    saving_table <- file.path(outputPath, "concept_mapping_coverage.csv")
-    write.csv(table, file=saving_table, row.names = FALSE)
-  }
-  
-  return(fig)
-}
-
 
 #' Joins two DQD results
 #' 
@@ -281,8 +168,6 @@ plotConceptCoverage <- function(jsonPath, outputPath = NA){
   r2 <- convertJsonResultsFileCase(jsonPath2, writeToFile = FALSE, targetCase = 'snake')
   # cr2 <- tibble(r2$CheckResults)
 
-  print(sprintf('Comparing %s against %s.', r1$Metadata$))
-  
   joinedCheckResults <- r1$CheckResults %>%
     dplyr::left_join(
       r2$CheckResults,
