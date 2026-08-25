@@ -122,6 +122,82 @@ server <- function(input, output, session) {
     res = 96
   )
 
+  output$compare_results_section_ui <- renderUI({
+    compareJsonPath <- Sys.getenv("compareJsonPath")
+
+    if (!nzchar(compareJsonPath)) {
+      return(NULL)
+    }
+
+    sectionContent <- NULL
+    if (!file.exists(compareJsonPath)) {
+      sectionContent <- tags$div(
+        class = "alert alert-warning",
+        sprintf("Comparison JSON file was not found: %s", compareJsonPath)
+      )
+    } else if (!requireNamespace("plotly", quietly = TRUE)) {
+      sectionContent <- tags$div(
+        class = "alert alert-warning",
+        "Install the 'plotly' package to view the DQD comparison plot."
+      )
+    } else {
+      sectionContent <- plotly::plotlyOutput("compare_results_plot", height = "720px")
+    }
+
+    tagList(
+      tags$hr(class = "m-0"),
+      tags$section(
+        class = "resume-section p-3 p-lg-5",
+        id = "compare-results",
+        tags$div(
+          class = "w-100",
+          tags$h2(class = "mb-4", "Compare Results"),
+          tags$p("Interactive comparison of the currently loaded DQD results against the optional second JSON file."),
+          sectionContent
+        )
+      )
+    )
+  })
+
+  observe({
+    compareJsonPath <- Sys.getenv("compareJsonPath")
+
+    if (!nzchar(compareJsonPath) ||
+        !file.exists(compareJsonPath) ||
+        !requireNamespace("plotly", quietly = TRUE)) {
+      return(invisible(NULL))
+    }
+
+    output$compare_results_plot <- plotly::renderPlotly({
+      tryCatch(
+        {
+          DataQualityDashboard::plotCompareDqdResults(
+            Sys.getenv("jsonPath"),
+            compareJsonPath
+          )
+        },
+        error = function(error) {
+          plotly::plot_ly() |>
+            plotly::layout(
+              xaxis = list(visible = FALSE),
+              yaxis = list(visible = FALSE),
+              annotations = list(list(
+                text = paste(
+                  "Comparison plot unavailable.",
+                  conditionMessage(error)
+                ),
+                x = 0.5,
+                y = 0.5,
+                xref = "paper",
+                yref = "paper",
+                showarrow = FALSE
+              ))
+            )
+        }
+      )
+    })
+  })
+
   observeEvent(input$sqlite_execute, {
     sqlitePath <- if (is.null(input$sqlite_path)) "" else trimws(input$sqlite_path)
     sqlQuery <- if (is.null(input$sqlite_query)) "" else trimws(input$sqlite_query)
@@ -227,6 +303,7 @@ ui <- fluidPage(
   suppressDependencies("bootstrap"),
   shiny::htmlTemplate(
     filename = "www/index.html",
+    compareResultsSectionUi = uiOutput("compare_results_section_ui"),
     conceptCoverageUi = tags$div(
       class = "concept-coverage-panel",
       plotOutput("concept_coverage_plot")

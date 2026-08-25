@@ -46,6 +46,8 @@ Suggests:
     DBI,
     RSQLite,
     ggplot2,
+    plotly,
+    htmlwidgets,
     Eunomia (>= 2.0.0),
     R.utils,
     devtools

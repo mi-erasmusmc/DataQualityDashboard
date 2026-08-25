@@ -4,10 +4,21 @@
 \alias{viewDqDashboard}
 \title{View DQ Dashboard}
 \usage{
-viewDqDashboard(jsonPath, launch.browser = NULL, display.mode = NULL, ...)
+viewDqDashboard(
+  jsonPath,
+  compareJsonPath = NULL,
+  launch.browser = NULL,
+  display.mode = NULL,
+  ...
+)
 }
 \arguments{
 \item{jsonPath}{The fully-qualified path to the JSON file produced by  \code{\link{executeDqChecks}}}
+
+\item{compareJsonPath}{Optional fully-qualified path to a second JSON file produced by
+\code{\link{executeDqChecks}}. When provided, the Shiny app shows
+an interactive comparison plot generated using
+\code{\link{plotCompareDqdResults}}.}
 
 \item{launch.browser}{Passed on to \code{shiny::runApp}}
 

@@ -17,22 +17,49 @@
 
 #' View DQ Dashboard
 #'
-#' @param jsonPath       The fully-qualified path to the JSON file produced by  \code{\link{executeDqChecks}}
-#' @param launch.browser Passed on to \code{shiny::runApp}
-#' @param display.mode   Passed on to \code{shiny::runApp}
-#' @param ...            Extra parameters for shiny::runApp() like "port" or "host"
+#' @param jsonPath        The fully-qualified path to the JSON file produced by \code{\link{executeDqChecks}}
+#' @param compareJsonPath Optional fully-qualified path to a second JSON file produced by
+#'                        \code{\link{executeDqChecks}}. When provided, the Shiny app shows
+#'                        an interactive comparison plot generated using
+#'                        \code{\link{plotCompareDqdResults}}.
+#' @param launch.browser  Passed on to \code{shiny::runApp}
+#' @param display.mode    Passed on to \code{shiny::runApp}
+#' @param ...             Extra parameters for shiny::runApp() like "port" or "host"
 #'
 #' @return NULL (launches Shiny application)
 #'
 #' @importFrom jsonlite toJSON parse_json
 #'
 #' @export
-viewDqDashboard <- function(jsonPath, launch.browser = NULL, display.mode = NULL, ...) {
+viewDqDashboard <- function(
+    jsonPath,
+    compareJsonPath = NULL,
+    launch.browser = NULL,
+    display.mode = NULL,
+    ...
+) {
   if (!requireNamespace("shiny", quietly = TRUE)) {
     stop("The 'shiny' package must be installed to use this function. Please install it with: install.packages(\"shiny\")", call. = FALSE)
   }
 
+  oldJsonPath <- Sys.getenv("jsonPath", unset = NA_character_)
+  oldCompareJsonPath <- Sys.getenv("compareJsonPath", unset = NA_character_)
+  on.exit({
+    if (is.na(oldJsonPath)) {
+      Sys.unsetenv("jsonPath")
+    } else {
+      Sys.setenv(jsonPath = oldJsonPath)
+    }
+
+    if (is.na(oldCompareJsonPath)) {
+      Sys.unsetenv("compareJsonPath")
+    } else {
+      Sys.setenv(compareJsonPath = oldCompareJsonPath)
+    }
+  }, add = TRUE)
+
   Sys.setenv(jsonPath = jsonPath)
+  Sys.setenv(compareJsonPath = if (is.null(compareJsonPath)) "" else compareJsonPath)
   appDir <- system.file("shinyApps", package = "DataQualityDashboard")
 
   if (is.null(display.mode)) {
