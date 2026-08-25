@@ -98,6 +98,30 @@ server <- function(input, output, session) {
     message = "Enter a SQLite file path and SQL query, then click Execute."
   ))
 
+  output$concept_coverage_plot <- renderPlot(
+    {
+      tryCatch(
+        {
+          DataQualityDashboard::plotConceptCoverage(Sys.getenv("jsonPath"))
+        },
+        error = function(error) {
+          plot.new()
+          text(
+            0.5,
+            0.5,
+            labels = paste(
+              "Concept coverage plot unavailable.",
+              conditionMessage(error)
+            ),
+            cex = 1
+          )
+        }
+      )
+    },
+    height = 720,
+    res = 96
+  )
+
   observeEvent(input$sqlite_execute, {
     sqlitePath <- if (is.null(input$sqlite_path)) "" else trimws(input$sqlite_path)
     sqlQuery <- if (is.null(input$sqlite_query)) "" else trimws(input$sqlite_query)
@@ -203,6 +227,10 @@ ui <- fluidPage(
   suppressDependencies("bootstrap"),
   shiny::htmlTemplate(
     filename = "www/index.html",
+    conceptCoverageUi = tags$div(
+      class = "concept-coverage-panel",
+      plotOutput("concept_coverage_plot")
+    ),
     sqliteQueryUi = tags$div(
       class = "sqlite-query-panel",
       textInput(
