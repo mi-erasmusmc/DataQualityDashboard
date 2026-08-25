@@ -16,6 +16,7 @@
 # SqlRender
 statement_*.sql
 errorReport.txt
+errorReportSql.txt
 
 # output files
 inst/results.json
@@ -28,6 +29,10 @@ inst/results.json
 # Other
 .DS_Store
 
+# Visual Studio Code
+.vscode/
+.lintr
+
 errorReport.txt
 output/
 results/
@@ -35,4 +40,10 @@ thresholds/
 hs_err_pid*.log
 docs/Gemfile
 docs/Gemfile.lock
-
+docs/CLAUDE.html
+vignettes/*.log
+/doc/
+/Meta/
+*.log
+/sql
+.cursor

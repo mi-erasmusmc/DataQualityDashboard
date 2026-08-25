@@ -1,10 +1,40 @@
-pandoc: 2.11.4
-pkgdown: 1.6.1.9000
+pandoc: '3.2'
+pkgdown: 2.1.2
 pkgdown_sha: ~
 articles:
-  CheckTypeDescriptions: CheckTypeDescriptions.html
+  AddNewCheck: AddNewCheck.html
+  checks/cdmDatatype: checks/cdmDatatype.html
+  checks/cdmField: checks/cdmField.html
+  checks/cdmTable: checks/cdmTable.html
+  checkIndex: checkIndex.html
+  CheckStatusDefinitions: CheckStatusDefinitions.html
   DataQualityDashboard: DataQualityDashboard.html
   DqdForCohorts: DqdForCohorts.html
+  checks/fkClass: checks/fkClass.html
+  checks/fkDomain: checks/fkDomain.html
+  checks/isForeignKey: checks/isForeignKey.html
+  checks/isPrimaryKey: checks/isPrimaryKey.html
+  checks/isRequired: checks/isRequired.html
+  checks/isStandardValidConcept: checks/isStandardValidConcept.html
+  checks/measureConditionEraCompleteness: checks/measureConditionEraCompleteness.html
+  checks/measureObservationPeriodOverlap: checks/measureObservationPeriodOverlap.html
+  checks/measurePersonCompleteness: checks/measurePersonCompleteness.html
+  checks/measureValueCompleteness: checks/measureValueCompleteness.html
+  checks/plausibleAfterBirth: checks/plausibleAfterBirth.html
+  checks/plausibleBeforeDeath: checks/plausibleBeforeDeath.html
+  checks/plausibleGenderUseDescendants: checks/plausibleGenderUseDescendants.html
+  checks/plausibleStartBeforeEnd: checks/plausibleStartBeforeEnd.html
+  checks/plausibleTemporalAfter: checks/plausibleTemporalAfter.html
+  checks/plausibleUnitConceptIds: checks/plausibleUnitConceptIds.html
+  checks/plausibleValueHigh: checks/plausibleValueHigh.html
+  checks/plausibleValueLow: checks/plausibleValueLow.html
+  checks/sourceConceptRecordCompleteness: checks/sourceConceptRecordCompleteness.html
+  checks/sourceValueCompleteness: checks/sourceValueCompleteness.html
+  SqlOnly: SqlOnly.html
+  checks/standardConceptRecordCompleteness: checks/standardConceptRecordCompleteness.html
   Thresholds: Thresholds.html
-last_built: 2021-03-12T02:02Z
-
+  checks/withinVisitDates: checks/withinVisitDates.html
+last_built: 2026-05-18T00:16Z
+urls:
+  reference: https://ohdsi.github.io/DataQualityDashboard/reference
+  article: https://ohdsi.github.io/DataQualityDashboard/articles

@@ -2,25 +2,18 @@
 title: "Failure Thresholds and How to Change Them"
 author: "Clair Blacketer"
 date: "`r Sys.Date()`"
-header-includes:
-    - \usepackage{fancyhdr}
-    - \pagestyle{fancy}
-    - \fancyhead{}
-    - \fancyhead[CO,CE]{Failure Thresholds and How to Change Them}
-    - \fancyfoot[CO,CE]{DataQualityDashboard Package Version `r    utils::packageVersion("DataQualityDashboard")`}
-    - \fancyfoot[LE,RO]{\thepage}
-    - \renewcommand{\headrulewidth}{0.4pt}
-    - \renewcommand{\footrulewidth}{0.4pt}
 output:
+  pdf_document:
+    number_sections: true
+    toc: true
   html_document:
-    number_sections: yes
-    toc: yes
+    number_sections: true
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{Failure Thresholds and How to Change Them}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::knitr}
 ---
-
-<!--
-%\VignetteEngine{knitr::knitr}
-%\VignetteIndexEntry{Failure Thresholds and How to Change Them}
--->
 
 # DQD Failure Thresholds
 
@@ -30,7 +23,7 @@ A default set of failure thresholds are shipped with the package. Many of these 
 
 ## DQD Control Files
 
-There is a set of three csv files that underly the DQD. These files indicate which checks should be run and what their failure thresholds should be. There is one file per check level: TABLE, FIELD, and CONCEPT. This vignette will walk through how to update the field level check thresholds but the process is the same for all three files. 
+There is a set of three csv files that underlie the DQD. These files indicate which checks should be run and what their failure thresholds should be. There is one file per check level: TABLE, FIELD, and CONCEPT. This vignette will walk through how to update the field level check thresholds but the process is the same for all three files. 
 
 ### Step 1: Find and copy the control files
 

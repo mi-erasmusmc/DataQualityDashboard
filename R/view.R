@@ -1,6 +1,4 @@
-# @file view.R
-#
-# Copyright 2020 Observational Health Data Sciences and Informatics
+# Copyright 2026 Observational Health Data Sciences and Informatics
 #
 # This file is part of DataQualityDashboard
 #
@@ -18,12 +16,32 @@
 
 
 #' View DQ Dashboard
-#' 
-#' @param jsonPath       The path to the JSON file produced by  \code{\link{executeDqChecks}}
-#' 
+#'
+#' @param jsonPath       The fully-qualified path to the JSON file produced by  \code{\link{executeDqChecks}}
+#' @param launch.browser Passed on to \code{shiny::runApp}
+#' @param display.mode   Passed on to \code{shiny::runApp}
+#' @param ...            Extra parameters for shiny::runApp() like "port" or "host"
+#'
+#' @return NULL (launches Shiny application)
+#'
+#' @importFrom jsonlite toJSON parse_json
+#'
 #' @export
-viewDqDashboard <- function(jsonPath) {
+viewDqDashboard <- function(jsonPath, launch.browser = NULL, display.mode = NULL, ...) {
+  if (!requireNamespace("shiny", quietly = TRUE)) {
+    stop("The 'shiny' package must be installed to use this function. Please install it with: install.packages(\"shiny\")", call. = FALSE)
+  }
+
   Sys.setenv(jsonPath = jsonPath)
   appDir <- system.file("shinyApps", package = "DataQualityDashboard")
-  shiny::runApp(appDir = appDir, display.mode = "normal", launch.browser = TRUE)
+
+  if (is.null(display.mode)) {
+    display.mode <- "normal"
+  }
+
+  if (is.null(launch.browser)) {
+    launch.browser <- TRUE
+  }
+
+  shiny::runApp(appDir = appDir, launch.browser = launch.browser, display.mode = display.mode, ...)
 }
