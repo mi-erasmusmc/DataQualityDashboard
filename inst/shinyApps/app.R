@@ -63,26 +63,28 @@ server <- function(input, output, session) {
     jsonPath <- Sys.getenv("jsonPath")
     results <- DataQualityDashboard::convertJsonResultsFileCase(jsonPath, writeToFile = FALSE, targetCase = "camel")
     
-    tryCatch({
-      # Read checkDescription to get severity status for each check
-      cdmVersion <- results$Metadata$cdmVersion
-      checkDescriptionsDf <- readr::read_csv(
-        file = system.file(
-          "csv",
-          sprintf("OMOP_CDMv%s_Check_Descriptions.csv", substr(sub('$v', '', cdmVersion), 1, 3)),  
-          package = "DataQualityDashboard"
-        ),
-        show_col_types = FALSE
-      )
-
-      results$CheckResults <- results$CheckResults |>
-        dplyr::left_join(
-          dplyr::select(checkDescriptionsDf, checkName, severity),
-          dplyr::join_by('checkName')
+    if (!('severity' %in% names(results$CheckResults))) {
+      tryCatch({
+        # Read checkDescription to get severity status for each check
+        cdmVersion <- results$Metadata$cdmVersion
+        checkDescriptionsDf <- readr::read_csv(
+          file = system.file(
+            "csv",
+            sprintf("OMOP_CDMv%s_Check_Descriptions.csv", substr(sub('$v', '', cdmVersion), 1, 3)),  
+            package = "DataQualityDashboard"
+          ),
+          show_col_types = FALSE
         )
-    }, error = function(e) {
-      results$CheckResults$severity <- NA
-    })
+
+        results$CheckResults <- results$CheckResults |>
+          dplyr::left_join(
+            checkDescriptionsDf,
+            dplyr::join_by('checkLevel', 'checkName')
+          )
+      }, error = function(e) {
+        results$CheckResults$severity <- NA
+      })
+    }
     
     results$appVersion <- as.character(packageVersion('DataQualityDashboard'))
     
