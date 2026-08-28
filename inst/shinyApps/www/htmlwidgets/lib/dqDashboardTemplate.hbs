@@ -106,27 +106,23 @@
     </table>
 </div>
 <div class="table-section">
-    <div class="table-title">Summary by Severity and CDM Field</div>
+    <div class="table-title">Failing Checks by Table and Severity</div>
     <table>
         <thead>
             <tr>
                 <td>Severity</td>
-                <td>CDM Field</td>
-                <td>Passing</td>
-                <td>Failing</td>
-                <td>Total</td>
-                <td>% Passing</td>
+                {{#each SeverityTableSummary.columns}}
+                <td>{{this}}</td>
+                {{/each}}
             </tr>
         </thead>
         <tbody>
-            {{#each SeverityFieldSummary}}
+            {{#each SeverityTableSummary.rows}}
             <tr>
                 <td class="dimension">{{severity}}</td>
-                <td class="dimension">{{cdmFieldName}}</td>
-                <td>{{Passing}}</td>
-                <td>{{Failing}}</td>
-                <td>{{Total}}</td>
-                <td>{{PercentPassing}}</td>
+                {{#each counts}}
+                <td>{{this}}</td>
+                {{/each}}
             </tr>
             {{/each}}
         </tbody>

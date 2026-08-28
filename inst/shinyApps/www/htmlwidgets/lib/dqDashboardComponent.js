@@ -1,18 +1,68 @@
+const isPassingCheck = c => (c.hasOwnProperty("passed") ? c.passed == 1 || c.notApplicable == 1 : c.failed == 0);
+const isFailingCheck = c => (c.hasOwnProperty("passed") ? c.failed == 1 || c.isError == 1 : c.failed == 1);
+const formatDimensionValue = value => value === undefined || value === null || value === "" ? "None" : value;
+const formatSeverityLabel = value => {
+  const severity = formatDimensionValue(value);
+  return severity === "None" ? severity : severity.charAt(0).toUpperCase() + severity.slice(1);
+};
+const severityLabels = ["Fatal", "Convention", "Characterization", "None"];
+
+function buildSeverityTableSummary(results) {
+  const severityTableCounts = results.reduce((summaryRows, check) => {
+    const tableKey = formatDimensionValue(check.cdmTableName);
+    const severityKey = formatSeverityLabel(check.severity);
+
+    if (!summaryRows[tableKey]) {
+      summaryRows[tableKey] = {
+        cdmTableName: tableKey,
+        Fatal: 0,
+        Convention: 0,
+        Characterization: 0,
+        None: 0
+      };
+    }
+
+    if (isFailingCheck(check)) {
+      summaryRows[tableKey][severityKey] += 1;
+    }
+
+    return summaryRows;
+  }, {});
+
+  const columns = Object.values(severityTableCounts)
+    .sort((left, right) => {
+      const leftSeverityTotal =
+        left.Fatal +
+        left.Convention +
+        left.Characterization +
+        left.None;
+      const rightSeverityTotal =
+        right.Fatal +
+        right.Convention +
+        right.Characterization +
+        right.None;
+
+      if (leftSeverityTotal !== rightSeverityTotal) {
+        return rightSeverityTotal - leftSeverityTotal;
+      }
+
+      return left.cdmTableName.localeCompare(right.cdmTableName);
+    })
+    .map(row => row.cdmTableName);
+
+  return {
+    columns: columns,
+    rows: severityLabels.map(severity => ({
+      severity: severity,
+      counts: columns.map(tableName => severityTableCounts[tableName][severity])
+    }))
+  };
+}
+
 class DqDashboard extends HTMLElement {
   static getTemplate() {
     return `
     <style>
-        .table-section + .table-section {
-          margin-top: 24px;
-        }
-
-        .table-title {
-          color: #20425a;
-          font-size: 22px;
-          font-weight: bold;
-          margin: 0 0 8px 0;
-        }
-
         table {
           width: 100%;
           border-collapse: collapse;
@@ -38,10 +88,6 @@ class DqDashboard extends HTMLElement {
             border: 1px solid #ddd;     
         }
 
-        td.dimension {
-          text-align: left;
-        }
-
         td {
             color: #000;
             padding: 3px 7px 3px 7px;
@@ -64,8 +110,7 @@ class DqDashboard extends HTMLElement {
         }
     </style>
 
-    <div class="table-section">
-      <table>
+    <table>
           <thead>
               <tr>
                   <td></td>
@@ -151,53 +196,14 @@ class DqDashboard extends HTMLElement {
                   <td class="overall">{{Total.Total.PercentPass}}</td>
               </tr>
           </tbody>
-      </table>
-      {{#if Total.Total.NA}}
-      <div class="text-muted">
-        <div>{{Total.Total.NA}} out of {{Total.Total.Pass}} passed checks are <a href="https://ohdsi.github.io/DataQualityDashboard/articles/CheckStatusDefinitions.html#not-applicable" target="_blank">Not Applicable</a>, due to empty tables or fields.</div>
-        <div>{{Total.Total.Error}} out of {{Total.Total.Fail}} failed checks are SQL errors.</div>
-        <div>Corrected pass percentage for NA and Errors: {{Total.Total.NAPercentPass}}  ({{Total.Total.NaTotalPassed}}/{{Total.Total.NaTotal}}).</div>
-      </div>
-      {{/if}}
+    </table>
+    {{#if Total.Total.NA}}
+    <div class="text-muted">
+      <div>{{Total.Total.NA}} out of {{Total.Total.Pass}} passed checks are <a href="https://ohdsi.github.io/DataQualityDashboard/articles/CheckStatusDefinitions.html#not-applicable" target="_blank">Not Applicable</a>, due to empty tables or fields.</div>
+      <div>{{Total.Total.Error}} out of {{Total.Total.Fail}} failed checks are SQL errors.</div>
+      <div>Corrected pass percentage for NA and Errors: {{Total.Total.NAPercentPass}}  ({{Total.Total.NaTotalPassed}}/{{Total.Total.NaTotal}}).</div>
     </div>
-    <div class="table-section">
-      <div class="table-title">Summary by Severity and CDM Field</div>
-      <table>
-        <thead>
-          <tr>
-            <td>Severity</td>
-            <td>CDM Field</td>
-            <td>Pass</td>
-            <td>Fail</td>
-            <td>Total</td>
-            <td>% Pass</td>
-          </tr>
-        </thead>
-        <tbody>
-          {{#if SeverityFieldSummary.length}}
-            {{#each SeverityFieldSummary}}
-            <tr>
-              <td class="dimension">{{severity}}</td>
-              <td class="dimension">{{cdmFieldName}}</td>
-              <td>{{Pass}}</td>
-              <td {{#if Fail}}class="fail"{{/if}}>{{Fail}}</td>
-              <td>{{Total}}</td>
-              <td>{{PercentPass}}</td>
-            </tr>
-            {{/each}}
-          {{else}}
-            <tr>
-              <td class="dimension">None</td>
-              <td class="dimension">None</td>
-              <td>0</td>
-              <td>0</td>
-              <td>0</td>
-              <td>-</td>
-            </tr>
-          {{/if}}
-        </tbody>
-      </table>
-    </div>
+    {{/if}}
     `;
   }
 
@@ -223,20 +229,6 @@ class DqDashboard extends HTMLElement {
   render() {
     if (!this.results || !Array.isArray(this.results))
       return;
-
-    const isPassingCheck = c => (c.hasOwnProperty("passed") ? c.passed == 1 || c.notApplicable == 1 : c.failed == 0);
-    const isFailingCheck = c => (c.hasOwnProperty("passed") ? c.failed == 1 || c.isError == 1 : c.failed == 1);
-    const formatDimensionValue = value => value === undefined || value === null || value === "" ? "None" : value;
-    const formatSeverityLabel = value => {
-      const severity = formatDimensionValue(value);
-      return severity === "None" ? severity : severity.charAt(0).toUpperCase() + severity.slice(1);
-    };
-    const severitySortOrder = {
-      fatal: 0,
-      convention: 1,
-      characterization: 2,
-      none: 3
-    };
 
     // Verification Plausibility
     const VerificationPlausibilityPass = this.results.filter(
@@ -468,55 +460,6 @@ class DqDashboard extends HTMLElement {
     const NaTotalPassed = AllPass-AllNA;
     const NaTotal = AllTotal-AllError-AllNA;
     const NAPercentPass = NaTotal == 0 ? "-" : Math.round(NaTotalPassed / NaTotal * 100) + "%";
-    const SeverityFieldSummary = Object.values(
-      this.results.reduce((summaryRows, check) => {
-        const severityKey = formatDimensionValue(check.severity);
-        const fieldKey = formatDimensionValue(check.cdmFieldName);
-        const summaryKey = `${severityKey}::${fieldKey}`;
-
-        if (!summaryRows[summaryKey]) {
-          summaryRows[summaryKey] = {
-            severity: formatSeverityLabel(check.severity),
-            severityOrder: severitySortOrder[severityKey.toLowerCase()] ?? Number.MAX_SAFE_INTEGER,
-            cdmFieldName: fieldKey,
-            Pass: 0,
-            Fail: 0,
-            Total: 0
-          };
-        }
-
-        summaryRows[summaryKey].Total += 1;
-
-        if (isPassingCheck(check)) {
-          summaryRows[summaryKey].Pass += 1;
-        }
-
-        if (isFailingCheck(check)) {
-          summaryRows[summaryKey].Fail += 1;
-        }
-
-        return summaryRows;
-      }, {})
-    )
-      .sort((left, right) => {
-        if (left.severityOrder !== right.severityOrder) {
-          return left.severityOrder - right.severityOrder;
-        }
-
-        if (left.severity !== right.severity) {
-          return left.severity.localeCompare(right.severity);
-        }
-
-        return left.cdmFieldName.localeCompare(right.cdmFieldName);
-      })
-      .map(row => ({
-        severity: row.severity,
-        cdmFieldName: row.cdmFieldName,
-        Pass: row.Pass,
-        Fail: row.Fail,
-        Total: row.Total,
-        PercentPass: row.Total == 0 ? "-" : Math.round(row.Pass / row.Total * 100) + "%"
-      }));
     
     const derivedResults = {
       "Verification": {
@@ -601,8 +544,7 @@ class DqDashboard extends HTMLElement {
           "NaTotal": NaTotal,
           "NAPercentPass": NAPercentPass
         }
-      },
-      "SeverityFieldSummary": SeverityFieldSummary
+      }
     }
 
     const hbTemplate = Handlebars.compile(DqDashboard.getTemplate());
@@ -612,3 +554,115 @@ class DqDashboard extends HTMLElement {
 }
 
 customElements.define('dq-dashboard', DqDashboard);
+
+class DqDashboardSeverity extends HTMLElement {
+  static getTemplate() {
+    return `
+    <style>
+        .table-title {
+          color: #20425a;
+          font-size: 22px;
+          font-weight: bold;
+          margin: 0 0 8px 0;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+
+        table thead tr td {
+            text-align: center;
+            color: #fff;
+            background-color: #20425a;
+            border: 1px solid #ddd;
+        }
+
+        table tbody tr:nth-child(even){
+          background-color: #f2f2f2;
+        }
+
+        table tbody tr td {
+            text-align: right;
+            border: 1px solid #ddd;
+        }
+
+        td.dimension {
+          text-align: left;
+          color: #fff;
+          background-color:#20425a;
+        }
+
+        td {
+            color: #000;
+            padding: 3px 7px 3px 7px;
+            font-size: 20px;
+        }
+
+        td.fail {
+          color: #C00;
+          font-weight:bold;
+        }
+    </style>
+
+    <div class="table-title">Failing Checks by Table and Severity</div>
+    <table>
+      <thead>
+        <tr>
+          <td>Severity</td>
+          {{#each columns}}
+          <td>{{this}}</td>
+          {{/each}}
+        </tr>
+      </thead>
+      <tbody>
+        {{#if rows.length}}
+          {{#each rows}}
+          <tr>
+            <td class="dimension">{{severity}}</td>
+            {{#each counts}}
+            <td {{#if this}}class="fail"{{/if}}>{{this}}</td>
+            {{/each}}
+          </tr>
+          {{/each}}
+        {{else}}
+          <tr>
+            <td class="dimension">None</td>
+            <td>0</td>
+          </tr>
+        {{/if}}
+      </tbody>
+    </table>
+    `;
+  }
+
+  connectedCallback() {
+    this.root = this.attachShadow({ mode: 'open' });
+    this.render();
+  }
+
+  static get observedAttributes() {
+    return ['data-results'];
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (this.root && oldValue !== newValue) {
+      this.render();
+    }
+  }
+
+  get results() {
+    return JSON.parse(this.getAttribute('data-results'));
+  }
+
+  render() {
+    if (!this.results || !Array.isArray(this.results))
+      return;
+
+    const hbTemplate = Handlebars.compile(DqDashboardSeverity.getTemplate());
+    const html = hbTemplate(buildSeverityTableSummary(this.results));
+    this.root.innerHTML = html;
+  }
+}
+
+customElements.define('dq-dashboard-severity', DqDashboardSeverity);

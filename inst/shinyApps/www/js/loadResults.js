@@ -1,6 +1,7 @@
 function loadResults(results) {
     $('dq-metadata-heading').attr('data-results', JSON.stringify(results));
     $('dq-dashboard').attr('data-results', JSON.stringify(results.CheckResults));
+    $('dq-dashboard-severity').attr('data-results', JSON.stringify(results.CheckResults));
 
     var metadata = results.Metadata[0];
     $('cdm-source-name').text(metadata.cdmSourceName);
