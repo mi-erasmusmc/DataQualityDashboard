@@ -5,7 +5,7 @@ const formatSeverityLabel = value => {
   const severity = formatDimensionValue(value);
   return severity === "None" ? severity : severity.charAt(0).toUpperCase() + severity.slice(1);
 };
-const severityLabels = ["Fatal", "Convention", "Characterization", "None"];
+const severityLabels = ["Fatal", "Convention", "Characterization"];
 
 function buildSeverityTableSummary(results) {
   const severityTableCounts = results.reduce((summaryRows, check) => {
@@ -52,10 +52,21 @@ function buildSeverityTableSummary(results) {
 
   return {
     columns: columns,
-    rows: severityLabels.map(severity => ({
-      severity: severity,
-      counts: columns.map(tableName => severityTableCounts[tableName][severity])
-    }))
+    rows: [
+      ...severityLabels.map(severity => ({
+        severity: severity,
+        counts: columns.map(tableName => severityTableCounts[tableName][severity])
+      })),
+      {
+        severity: "Total",
+        counts: columns.map(tableName =>
+          severityTableCounts[tableName].Fatal +
+          severityTableCounts[tableName].Convention +
+          severityTableCounts[tableName].Characterization +
+          severityTableCounts[tableName].None
+        )
+      }
+    ]
   };
 }
 

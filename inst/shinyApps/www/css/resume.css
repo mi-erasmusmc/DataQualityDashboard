@@ -14,6 +14,36 @@ table.dataTable thead th,table.dataTable thead td{
   padding-right: 15px;
 }
 
+#dt-results {
+  table-layout: fixed;
+}
+
+#dt-results thead th,
+#dt-results tbody td {
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+#dt-results thead th {
+  vertical-align: top;
+}
+
+#dt-results thead th select {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin-top: 0.25rem;
+  font-size: 11px;
+}
+
+#dt-results td.details-control {
+  width: 24px;
+  min-width: 24px;
+}
+
 td {
   vertical-align: top;
   font-size:14px;
@@ -29,6 +59,7 @@ select {
 
 td.description {
   font-size:12px;
+  line-height: 1.3;
 }
 
 td.details-control {

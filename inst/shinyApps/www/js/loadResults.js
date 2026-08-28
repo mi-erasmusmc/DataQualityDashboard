@@ -101,6 +101,7 @@ function loadResults(results) {
         dom: '<B>l<fr<t>ip>',
         lengthMenu: [[5, 10, -1], [5, 10, "All"]],
         order: [[10, "desc"]],
+        autoWidth: false,
         buttons: [
             'colvis',
             {
@@ -149,17 +150,18 @@ function loadResults(results) {
             {
                 "className": 'details-control',
                 "data": null,
-                "defaultContent": ''
+                "defaultContent": '',
+                width: "3%"
             },
-            { data: function (d) { if (d.isError == 1) { return "ERROR" } else if (d.notApplicable == 1) { return "NOT APPLICABLE" } else if (d.failed == 1) { return "FAIL" } else {return "PASS"} }, title: "STATUS", className: 'dt-body-right' },
+            { data: function (d) { if (d.isError == 1) { return "ERROR" } else if (d.notApplicable == 1) { return "NOT APPLICABLE" } else if (d.failed == 1) { return "FAIL" } else {return "PASS"} }, title: "STATUS", className: 'dt-body-right', width: "10%" },
             /*{ data: function (d) { return d.context ? d.context : "None"; }, title: "CONTEXT" },*/
-            { data: "cdmTableName", title: "TABLE"},
-            { data: function (d) { return d.cdmFieldName ? d.cdmFieldName : "None"; }, title: "FIELD", visible: true },
-            { data: "checkName", title: "CHECK", visible: true},
-            { data: "category", title: "CATEGORY" },
+            { data: "cdmTableName", title: "TABLE", width: "9%"},
+            { data: function (d) { return d.cdmFieldName ? d.cdmFieldName : "None"; }, title: "FIELD", visible: true, width: "11%" },
+            { data: "checkName", title: "CHECK", visible: true, width: "12%"},
+            { data: "category", title: "CATEGORY", width: "10%" },
             { data: function (d) { return d.subcategory ? d.subcategory : "None" }, title: "SUBCATEGORY", visible: false },
             { data: "checkLevel", title: "LEVEL", visible: false },
-            { data: "severity", title: "SEVERITY", visible: true },
+            { data: "severity", title: "SEVERITY", visible: true, width: "8%" },
             { data: function (d) { if (d.notesValue == null) { return "None"; } else { return "Exists"; } }, title: "NOTES", visible: false },
             
             {
@@ -169,9 +171,9 @@ function loadResults(results) {
                         thresholdMessage = ' (Threshold=' + d.thresholdValue + '%).';
                     }
                     return d.checkDescription + thresholdMessage;
-                }, title: "DESCRIPTION", className: "description", width: "40%"
+                }, title: "DESCRIPTION", className: "description", width: "29%"
             },
-            { data: function (d) { return d.pctViolatedRows ? (d.pctViolatedRows * 100).toFixed(2) + '%' : '0%' }, title: "%&nbsp;RECORDS", type: "num-fmt", className: 'dt-body-right', orderable: true }
+            { data: function (d) { return d.pctViolatedRows ? (d.pctViolatedRows * 100).toFixed(2) + '%' : '0%' }, title: "%&nbsp;RECORDS", type: "num-fmt", className: 'dt-body-right', orderable: true, width: "8%" }
         ],
         columnDefs: [{
             targets: [0, 1, 2, 3, 4, 5, 6],
