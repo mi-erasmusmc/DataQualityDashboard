@@ -54,11 +54,11 @@ convertJsonResultsFileCase <- function(
   results <- jsonlite::fromJSON(jsonFilePath)
 
   if ("numViolatedRows" %in% names(results$CheckResults) && targetCase == "camel") {
-    warning("File is already in camelcase! No conversion will be performed.")
+    # File is already in camelcase! No conversion will be performed.
     return(results)
   }
   if ("NUM_VIOLATED_ROWS" %in% names(results$CheckResults) && targetCase == "snake") {
-    warning("File is already in snakecase! No conversion will be performed.")
+    # File is already in snakecase! No conversion will be performed.
     return(results)
   }
 
