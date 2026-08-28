@@ -315,6 +315,7 @@ ui <- fluidPage(
       textInput(
         inputId = "sqlite_path",
         label = "SQLite file path",
+        value = Sys.getenv('sqlitePath'),
         placeholder = "/path/to/database.sqlite"
       ),
       textAreaInput(

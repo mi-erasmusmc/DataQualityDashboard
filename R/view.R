@@ -33,6 +33,7 @@
 #' @export
 viewDqDashboard <- function(
     jsonPath,
+    sqlitePath = file.path(getwd(), 'data/chimera.sqlite'),
     compareJsonPath = NULL,
     launch.browser = NULL,
     display.mode = NULL,
@@ -60,6 +61,7 @@ viewDqDashboard <- function(
 
   Sys.setenv(jsonPath = jsonPath)
   Sys.setenv(compareJsonPath = if (is.null(compareJsonPath)) "" else compareJsonPath)
+  Sys.setenv(sqlitePath = if (is.null(sqlitePath)) "" else sqlitePath)
   appDir <- system.file("shinyApps", package = "DataQualityDashboard")
 
   if (is.null(display.mode)) {
