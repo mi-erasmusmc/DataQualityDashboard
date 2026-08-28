@@ -64,5 +64,31 @@
             "Total": 100,
             "PercentPassing": "10%"
         }
-    }
+    },
+    "SeverityFieldSummary": [
+        {
+            "severity": "Fatal",
+            "cdmFieldName": "PERSON_ID",
+            "Passing": 12,
+            "Failing": 3,
+            "Total": 15,
+            "PercentPassing": "80%"
+        },
+        {
+            "severity": "Convention",
+            "cdmFieldName": "VISIT_START_DATE",
+            "Passing": 9,
+            "Failing": 1,
+            "Total": 10,
+            "PercentPassing": "90%"
+        },
+        {
+            "severity": "Characterization",
+            "cdmFieldName": "GENDER_CONCEPT_ID",
+            "Passing": 4,
+            "Failing": 1,
+            "Total": 5,
+            "PercentPassing": "80%"
+        }
+    ]
 }

@@ -2,6 +2,17 @@ class DqDashboard extends HTMLElement {
   static getTemplate() {
     return `
     <style>
+        .table-section + .table-section {
+          margin-top: 24px;
+        }
+
+        .table-title {
+          color: #20425a;
+          font-size: 22px;
+          font-weight: bold;
+          margin: 0 0 8px 0;
+        }
+
         table {
           width: 100%;
           border-collapse: collapse;
@@ -27,6 +38,10 @@ class DqDashboard extends HTMLElement {
             border: 1px solid #ddd;     
         }
 
+        td.dimension {
+          text-align: left;
+        }
+
         td {
             color: #000;
             padding: 3px 7px 3px 7px;
@@ -49,100 +64,140 @@ class DqDashboard extends HTMLElement {
         }
     </style>
 
-    <table>
+    <div class="table-section">
+      <table>
+          <thead>
+              <tr>
+                  <td></td>
+                  <td colspan="4">Verification</td>
+                  <td colspan="4">Validation</td>
+                  <td colspan="4">Total</td>
+              </tr>
+              <tr>
+                  <td></td>
+                  <td>Pass</td>
+                  <td>Fail</td>
+                  <td>Total</td>
+                  <td>% Pass</td>
+                  <td>Pass</td>
+                  <td>Fail</td>
+                  <td>Total</td>
+                  <td>% Pass</td>
+                  <td>Pass</td>
+                  <td>Fail</td>
+                  <td>Total</td>
+                  <td>% Pass</td>
+              </tr>
+          </thead>
+          <tbody>
+              <tr>
+                  <td>Plausibility </td>
+                  <td>{{Verification.Plausibility.Pass}}</td>
+                  <td {{#if Verification.Plausibility.Fail}}class="fail"{{/if}}>{{Verification.Plausibility.Fail}}</td>
+                  <td>{{Verification.Plausibility.Total}}</td>
+                  <td>{{Verification.Plausibility.PercentPass}}</td>
+                  <td>{{Validation.Plausibility.Pass}}</td>
+                  <td {{#if Validation.Plausibility.Fail}}class="fail"{{/if}}>{{Validation.Plausibility.Fail}}</td>
+                  <td>{{Validation.Plausibility.Total}}</td>
+                  <td>{{Validation.Plausibility.PercentPass}}</td>
+                  <td>{{Total.Plausibility.Pass}}</td>
+                  <td {{#if Total.Plausibility.Fail}}class="fail"{{/if}}>{{Total.Plausibility.Fail}}</td>
+                  <td>{{Total.Plausibility.Total}}</td>
+                  <td>{{Total.Plausibility.PercentPass}}</td>
+              </tr>
+              <tr>
+                  <td>Conformance </td>
+                  <td>{{Verification.Conformance.Pass}}</td>
+                  <td {{#if Verification.Conformance.Fail}}class="fail"{{/if}}>{{Verification.Conformance.Fail}}</td>
+                  <td>{{Verification.Conformance.Total}}</td>
+                  <td>{{Verification.Conformance.PercentPass}}</td>
+                  <td>{{Validation.Conformance.Pass}}</td>
+                  <td {{#if Validation.Conformance.Fail}}class="fail"{{/if}}>{{Validation.Conformance.Fail}}</td>
+                  <td>{{Validation.Conformance.Total}}</td>
+                  <td>{{Validation.Conformance.PercentPass}}</td>
+                  <td>{{Total.Conformance.Pass}}</td>
+                  <td {{#if Total.Conformance.Fail}}class="fail"{{/if}}>{{Total.Conformance.Fail}}</td>
+                  <td>{{Total.Conformance.Total}}</td>
+                  <td>{{Total.Conformance.PercentPass}}</td>
+              </tr>
+              <tr>
+                  <td>Completeness </td>
+                  <td>{{Verification.Completeness.Pass}}</td>
+                  <td {{#if Verification.Completeness.Fail}}class="fail"{{/if}}>{{Verification.Completeness.Fail}}</td>
+                  <td>{{Verification.Completeness.Total}}</td>
+                  <td>{{Verification.Completeness.PercentPass}}</td>
+                  <td>{{Validation.Completeness.Pass}}</td>
+                  <td {{#if Validation.Completeness.Fail}}class="fail"{{/if}}>{{Validation.Completeness.Fail}}</td>
+                  <td>{{Validation.Completeness.Total}}</td>
+                  <td>{{Validation.Completeness.PercentPass}}</td>
+                  <td>{{Total.Completeness.Pass}}</td>
+                  <td {{#if Total.Completeness.Fail}}class="fail"{{/if}}>{{Total.Completeness.Fail}}</td>
+                  <td>{{Total.Completeness.Total}}</td>
+                  <td>{{Total.Completeness.PercentPass}}</td>
+              </tr>
+              <tr>
+                  <td>Total </td>
+                  <td>{{Verification.Total.Pass}}</td>
+                  <td {{#if Verification.Total.Fail}}class="fail"{{/if}}>{{Verification.Total.Fail}}</td>
+                  <td>{{Verification.Total.Total}}</td>
+                  <td>{{Verification.Total.PercentPass}}</td>
+                  <td>{{Validation.Total.Pass}}</td>
+                  <td {{#if Validation.Total.Fail}}class="fail"{{/if}}>{{Validation.Total.Fail}}</td>
+                  <td>{{Validation.Total.Total}}</td>
+                  <td>{{Validation.Total.PercentPass}}</td>
+                  <td>{{Total.Total.Pass}}</td>
+                  <td {{#if Total.Total.Fail}}class="fail"{{/if}}>{{Total.Total.Fail}}</td>
+                  <td>{{Total.Total.Total}}</td>
+                  <td class="overall">{{Total.Total.PercentPass}}</td>
+              </tr>
+          </tbody>
+      </table>
+      {{#if Total.Total.NA}}
+      <div class="text-muted">
+        <div>{{Total.Total.NA}} out of {{Total.Total.Pass}} passed checks are <a href="https://ohdsi.github.io/DataQualityDashboard/articles/CheckStatusDefinitions.html#not-applicable" target="_blank">Not Applicable</a>, due to empty tables or fields.</div>
+        <div>{{Total.Total.Error}} out of {{Total.Total.Fail}} failed checks are SQL errors.</div>
+        <div>Corrected pass percentage for NA and Errors: {{Total.Total.NAPercentPass}}  ({{Total.Total.NaTotalPassed}}/{{Total.Total.NaTotal}}).</div>
+      </div>
+      {{/if}}
+    </div>
+    <div class="table-section">
+      <div class="table-title">Summary by Severity and CDM Field</div>
+      <table>
         <thead>
-            <tr>
-                <td></td>
-                <td colspan="4">Verification</td>
-                <td colspan="4">Validation</td>
-                <td colspan="4">Total</td>
-            </tr>
-            <tr>
-                <td></td>
-                <td>Pass</td>
-                <td>Fail</td>
-                <td>Total</td>
-                <td>% Pass</td>
-                <td>Pass</td>
-                <td>Fail</td>
-                <td>Total</td>
-                <td>% Pass</td>
-                <td>Pass</td>
-                <td>Fail</td>
-                <td>Total</td>
-                <td>% Pass</td>
-            </tr>
+          <tr>
+            <td>Severity</td>
+            <td>CDM Field</td>
+            <td>Pass</td>
+            <td>Fail</td>
+            <td>Total</td>
+            <td>% Pass</td>
+          </tr>
         </thead>
         <tbody>
+          {{#if SeverityFieldSummary.length}}
+            {{#each SeverityFieldSummary}}
             <tr>
-                <td>Plausibility </td>
-                <td>{{Verification.Plausibility.Pass}}</td>
-                <td {{#if Verification.Plausibility.Fail}}class="fail"{{/if}}>{{Verification.Plausibility.Fail}}</td>
-                <td>{{Verification.Plausibility.Total}}</td>
-                <td>{{Verification.Plausibility.PercentPass}}</td>
-                <td>{{Validation.Plausibility.Pass}}</td>
-                <td {{#if Validation.Plausibility.Fail}}class="fail"{{/if}}>{{Validation.Plausibility.Fail}}</td>
-                <td>{{Validation.Plausibility.Total}}</td>
-                <td>{{Validation.Plausibility.PercentPass}}</td>
-                <td>{{Total.Plausibility.Pass}}</td>
-                <td {{#if Total.Plausibility.Fail}}class="fail"{{/if}}>{{Total.Plausibility.Fail}}</td>                
-                <td>{{Total.Plausibility.Total}}</td>
-                <td>{{Total.Plausibility.PercentPass}}</td>
+              <td class="dimension">{{severity}}</td>
+              <td class="dimension">{{cdmFieldName}}</td>
+              <td>{{Pass}}</td>
+              <td {{#if Fail}}class="fail"{{/if}}>{{Fail}}</td>
+              <td>{{Total}}</td>
+              <td>{{PercentPass}}</td>
             </tr>
+            {{/each}}
+          {{else}}
             <tr>
-                <td>Conformance </td>
-                <td>{{Verification.Conformance.Pass}}</td>
-                <td {{#if Verification.Conformance.Fail}}class="fail"{{/if}}>{{Verification.Conformance.Fail}}</td>
-                <td>{{Verification.Conformance.Total}}</td>
-                <td>{{Verification.Conformance.PercentPass}}</td>
-                <td>{{Validation.Conformance.Pass}}</td>
-                <td {{#if Validation.Conformance.Fail}}class="fail"{{/if}}>{{Validation.Conformance.Fail}}</td>
-                <td>{{Validation.Conformance.Total}}</td>
-                <td>{{Validation.Conformance.PercentPass}}</td>
-                <td>{{Total.Conformance.Pass}}</td>
-                <td {{#if Total.Conformance.Fail}}class="fail"{{/if}}>{{Total.Conformance.Fail}}</td>                
-                <td>{{Total.Conformance.Total}}</td>
-                <td>{{Total.Conformance.PercentPass}}</td>
+              <td class="dimension">None</td>
+              <td class="dimension">None</td>
+              <td>0</td>
+              <td>0</td>
+              <td>0</td>
+              <td>-</td>
             </tr>
-            <tr>
-                <td>Completeness </td>
-                <td>{{Verification.Completeness.Pass}}</td>
-                <td {{#if Verification.Completeness.Fail}}class="fail"{{/if}}>{{Verification.Completeness.Fail}}</td>
-                <td>{{Verification.Completeness.Total}}</td>
-                <td>{{Verification.Completeness.PercentPass}}</td>
-                <td>{{Validation.Completeness.Pass}}</td>
-                <td {{#if Validation.Completeness.Fail}}class="fail"{{/if}}>{{Validation.Completeness.Fail}}</td>                
-                <td>{{Validation.Completeness.Total}}</td>
-                <td>{{Validation.Completeness.PercentPass}}</td>
-                <td>{{Total.Completeness.Pass}}</td>
-                <td {{#if Total.Completeness.Fail}}class="fail"{{/if}}>{{Total.Completeness.Fail}}</td>
-                <td>{{Total.Completeness.Total}}</td>
-                <td>{{Total.Completeness.PercentPass}}</td>
-            </tr>
-            <tr>
-                <td>Total </td>
-                <td>{{Verification.Total.Pass}}</td>
-                <td {{#if Verification.Total.Fail}}class="fail"{{/if}}>{{Verification.Total.Fail}}</td>
-                <td>{{Verification.Total.Total}}</td>
-                <td>{{Verification.Total.PercentPass}}</td>
-                <td>{{Validation.Total.Pass}}</td>
-                <td {{#if Validation.Total.Fail}}class="fail"{{/if}}>{{Validation.Total.Fail}}</td>
-                <td>{{Validation.Total.Total}}</td>
-                <td>{{Validation.Total.PercentPass}}</td>
-                <td>{{Total.Total.Pass}}</td>
-                <td {{#if Total.Total.Fail}}class="fail"{{/if}}>{{Total.Total.Fail}}</td>                
-                <td>{{Total.Total.Total}}</td>
-                <td class="overall">{{Total.Total.PercentPass}}</td>
-            </tr>
+          {{/if}}
         </tbody>
-    </table>
-    {{#if Total.Total.NA}}
-    <div class="text-muted">
-      <div>{{Total.Total.NA}} out of {{Total.Total.Pass}} passed checks are <a href="https://ohdsi.github.io/DataQualityDashboard/articles/CheckStatusDefinitions.html#not-applicable" target="_blank">Not Applicable</a>, due to empty tables or fields.</div>
-      <div>{{Total.Total.Error}} out of {{Total.Total.Fail}} failed checks are SQL errors.</div>
-      <div>Corrected pass percentage for NA and Errors: {{Total.Total.NAPercentPass}}  ({{Total.Total.NaTotalPassed}}/{{Total.Total.NaTotal}}).</div>
+      </table>
     </div>
-    {{/if}}
     `;
   }
 
@@ -169,15 +224,29 @@ class DqDashboard extends HTMLElement {
     if (!this.results || !Array.isArray(this.results))
       return;
 
+    const isPassingCheck = c => (c.hasOwnProperty("passed") ? c.passed == 1 || c.notApplicable == 1 : c.failed == 0);
+    const isFailingCheck = c => (c.hasOwnProperty("passed") ? c.failed == 1 || c.isError == 1 : c.failed == 1);
+    const formatDimensionValue = value => value === undefined || value === null || value === "" ? "None" : value;
+    const formatSeverityLabel = value => {
+      const severity = formatDimensionValue(value);
+      return severity === "None" ? severity : severity.charAt(0).toUpperCase() + severity.slice(1);
+    };
+    const severitySortOrder = {
+      fatal: 0,
+      convention: 1,
+      characterization: 2,
+      none: 3
+    };
+
     // Verification Plausibility
     const VerificationPlausibilityPass = this.results.filter(
-      c => (c.hasOwnProperty("passed") ? c.passed == 1 || c.notApplicable == 1 : c.failed == 0) &&
+      c => isPassingCheck(c) &&
         c.context == "Verification"
         && c.category == "Plausibility"
     ).length;
 
     const VerificationPlausibilityFail = this.results.filter(
-      c => (c.hasOwnProperty("passed") ? c.failed == 1 || c.isError == 1 : c.failed == 1) &&
+      c => isFailingCheck(c) &&
         c.context == "Verification"
         && c.category == "Plausibility"
     ).length;
@@ -191,13 +260,13 @@ class DqDashboard extends HTMLElement {
 
     // Verification Conformance
     const VerificationConformancePass = this.results.filter(
-      c => (c.hasOwnProperty("passed") ? c.passed == 1 || c.notApplicable == 1 : c.failed == 0) &&
+      c => isPassingCheck(c) &&
         c.context == "Verification"
         && c.category == "Conformance"
     ).length;
 
     const VerificationConformanceFail = this.results.filter(
-      c => (c.hasOwnProperty("passed") ? c.failed == 1 || c.isError == 1 : c.failed == 1) &&
+      c => isFailingCheck(c) &&
         c.context == "Verification"
         && c.category == "Conformance"
     ).length;
@@ -211,13 +280,13 @@ class DqDashboard extends HTMLElement {
 
     // Verification Completeness
     const VerificationCompletenessPass = this.results.filter(
-      c => (c.hasOwnProperty("passed") ? c.passed == 1 || c.notApplicable == 1 : c.failed == 0) &&
+      c => isPassingCheck(c) &&
         c.context == "Verification"
         && c.category == "Completeness"
     ).length;
 
     const VerificationCompletenessFail = this.results.filter(
-      c => (c.hasOwnProperty("passed") ? c.failed == 1 || c.isError == 1 : c.failed == 1) &&
+      c => isFailingCheck(c) &&
         c.context == "Verification"
         && c.category == "Completeness"
     ).length;
@@ -231,12 +300,12 @@ class DqDashboard extends HTMLElement {
 
     // Verification Totals
     const VerificationPass = this.results.filter(
-      c => (c.hasOwnProperty("passed") ? c.passed == 1 || c.notApplicable == 1 : c.failed == 0) &&
+      c => isPassingCheck(c) &&
         c.context == "Verification"
     ).length;
 
     const VerificationFail = this.results.filter(
-      c => (c.hasOwnProperty("passed") ? c.failed == 1 || c.isError == 1 : c.failed == 1) &&
+      c => isFailingCheck(c) &&
         c.context == "Verification"
     ).length;
 
@@ -248,13 +317,13 @@ class DqDashboard extends HTMLElement {
 
     // Validation Plausibility
     const ValidationPlausibilityPass = this.results.filter(
-      c => (c.hasOwnProperty("passed") ? c.passed == 1 || c.notApplicable == 1 : c.failed == 0) &&
+      c => isPassingCheck(c) &&
         c.context == "Validation"
         && c.category == "Plausibility"
     ).length;
 
     const ValidationPlausibilityFail = this.results.filter(
-      c => (c.hasOwnProperty("passed") ? c.failed == 1 || c.isError == 1 : c.failed == 1) &&
+      c => isFailingCheck(c) &&
         c.context == "Validation"
         && c.category == "Plausibility"
     ).length;
@@ -268,13 +337,13 @@ class DqDashboard extends HTMLElement {
 
     // Validation Conformance
     const ValidationConformancePass = this.results.filter(
-      c => (c.hasOwnProperty("passed") ? c.passed == 1 || c.notApplicable == 1 : c.failed == 0) &&
+      c => isPassingCheck(c) &&
         c.context == "Validation"
         && c.category == "Conformance"
     ).length;
 
     const ValidationConformanceFail = this.results.filter(
-      c => (c.hasOwnProperty("passed") ? c.failed == 1 || c.isError == 1 : c.failed == 1) &&
+      c => isFailingCheck(c) &&
         c.context == "Validation"
         && c.category == "Conformance"
     ).length;
@@ -288,13 +357,13 @@ class DqDashboard extends HTMLElement {
 
     // Validation Completeness
     const ValidationCompletenessPass = this.results.filter(
-      c => (c.hasOwnProperty("passed") ? c.passed == 1 || c.notApplicable == 1 : c.failed == 0) &&
+      c => isPassingCheck(c) &&
         c.context == "Validation"
         && c.category == "Completeness"
     ).length;
 
     const ValidationCompletenessFail = this.results.filter(
-      c => (c.hasOwnProperty("passed") ? c.failed == 1 || c.isError == 1 : c.failed == 1) &&
+      c => isFailingCheck(c) &&
         c.context == "Validation"
         && c.category == "Completeness"
     ).length;
@@ -308,12 +377,12 @@ class DqDashboard extends HTMLElement {
 
     // Validation
     const ValidationPass = this.results.filter(
-      c => (c.hasOwnProperty("passed") ? c.passed == 1 || c.notApplicable == 1 : c.failed == 0) &&
+      c => isPassingCheck(c) &&
         c.context == "Validation"
     ).length;
 
     const ValidationFail = this.results.filter(
-      c => (c.hasOwnProperty("passed") ? c.failed == 1 || c.isError == 1 : c.failed == 1) &&
+      c => isFailingCheck(c) &&
         c.context == "Validation"
     ).length;
 
@@ -325,12 +394,12 @@ class DqDashboard extends HTMLElement {
 
     // Plausibility
     const PlausibilityPass = this.results.filter(
-      c => (c.hasOwnProperty("passed") ? c.passed == 1 || c.notApplicable == 1 : c.failed == 0) &&
+      c => isPassingCheck(c) &&
         c.category == "Plausibility"
     ).length;
 
     const PlausibilityFail = this.results.filter(
-      c => (c.hasOwnProperty("passed") ? c.failed == 1 || c.isError == 1 : c.failed == 1) &&
+      c => isFailingCheck(c) &&
         c.category == "Plausibility"
     ).length;
 
@@ -342,12 +411,12 @@ class DqDashboard extends HTMLElement {
 
     // Conformance
     const ConformancePass = this.results.filter(
-      c => (c.hasOwnProperty("passed") ? c.passed == 1 || c.notApplicable == 1 : c.failed == 0)
+      c => isPassingCheck(c)
         && c.category == "Conformance"
     ).length;
 
     const ConformanceFail = this.results.filter(
-      c => (c.hasOwnProperty("passed") ? c.failed == 1 || c.isError == 1 : c.failed == 1)
+      c => isFailingCheck(c)
         && c.category == "Conformance"
     ).length;
 
@@ -359,12 +428,12 @@ class DqDashboard extends HTMLElement {
 
     // Completeness
     const CompletenessPass = this.results.filter(
-      c => (c.hasOwnProperty("passed") ? c.passed == 1 || c.notApplicable == 1 : c.failed == 0)
+      c => isPassingCheck(c)
         && c.category == "Completeness"
     ).length;
 
     const CompletenessFail = this.results.filter(
-      c => (c.hasOwnProperty("passed") ? c.failed == 1 || c.isError == 1 : c.failed == 1)
+      c => isFailingCheck(c)
         && c.category == "Completeness"
     ).length;
 
@@ -376,11 +445,11 @@ class DqDashboard extends HTMLElement {
 
     // All
     const AllPass = this.results.filter(
-      c => (c.hasOwnProperty("passed") ? c.passed == 1 || c.notApplicable == 1 : c.failed == 0)
+      c => isPassingCheck(c)
     ).length;
 
     const AllFail = this.results.filter(
-      c => (c.hasOwnProperty("passed") ? c.failed == 1 || c.isError == 1 : c.failed == 1)
+      c => isFailingCheck(c)
     ).length;
 
     const AllTotal = this.results.length;
@@ -399,6 +468,55 @@ class DqDashboard extends HTMLElement {
     const NaTotalPassed = AllPass-AllNA;
     const NaTotal = AllTotal-AllError-AllNA;
     const NAPercentPass = NaTotal == 0 ? "-" : Math.round(NaTotalPassed / NaTotal * 100) + "%";
+    const SeverityFieldSummary = Object.values(
+      this.results.reduce((summaryRows, check) => {
+        const severityKey = formatDimensionValue(check.severity);
+        const fieldKey = formatDimensionValue(check.cdmFieldName);
+        const summaryKey = `${severityKey}::${fieldKey}`;
+
+        if (!summaryRows[summaryKey]) {
+          summaryRows[summaryKey] = {
+            severity: formatSeverityLabel(check.severity),
+            severityOrder: severitySortOrder[severityKey.toLowerCase()] ?? Number.MAX_SAFE_INTEGER,
+            cdmFieldName: fieldKey,
+            Pass: 0,
+            Fail: 0,
+            Total: 0
+          };
+        }
+
+        summaryRows[summaryKey].Total += 1;
+
+        if (isPassingCheck(check)) {
+          summaryRows[summaryKey].Pass += 1;
+        }
+
+        if (isFailingCheck(check)) {
+          summaryRows[summaryKey].Fail += 1;
+        }
+
+        return summaryRows;
+      }, {})
+    )
+      .sort((left, right) => {
+        if (left.severityOrder !== right.severityOrder) {
+          return left.severityOrder - right.severityOrder;
+        }
+
+        if (left.severity !== right.severity) {
+          return left.severity.localeCompare(right.severity);
+        }
+
+        return left.cdmFieldName.localeCompare(right.cdmFieldName);
+      })
+      .map(row => ({
+        severity: row.severity,
+        cdmFieldName: row.cdmFieldName,
+        Pass: row.Pass,
+        Fail: row.Fail,
+        Total: row.Total,
+        PercentPass: row.Total == 0 ? "-" : Math.round(row.Pass / row.Total * 100) + "%"
+      }));
     
     const derivedResults = {
       "Verification": {
@@ -483,7 +601,8 @@ class DqDashboard extends HTMLElement {
           "NaTotal": NaTotal,
           "NAPercentPass": NAPercentPass
         }
-      }
+      },
+      "SeverityFieldSummary": SeverityFieldSummary
     }
 
     const hbTemplate = Handlebars.compile(DqDashboard.getTemplate());
