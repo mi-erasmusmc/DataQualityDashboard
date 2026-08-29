@@ -8,6 +8,10 @@ function loadResults(results) {
     $('dq-metadata').attr('data-results', JSON.stringify(metadata));
     $('#appVersion').text(results.appVersion);
 
+    function getCheckDescription(d) {
+        return d.checkDescription || d.checkDescription.x || d.checkDescription.y || '';
+    }
+
     function format(d) {
         errorMessage = '';
         thresholdMessage = ''
@@ -36,7 +40,7 @@ function loadResults(results) {
             '</tr>' +
             '<tr>' +
             '<td>Description:</td>' +
-            '<td>' + d.checkDescription + thresholdMessage + '.</td>' +
+            '<td>' + getCheckDescription(d) + thresholdMessage + '.</td>' +
             '</tr>' +
             '<tr>' +
             '<td>Notes:</td>' +
@@ -170,7 +174,7 @@ function loadResults(results) {
                     if (d.thresholdValue != undefined) {
                         thresholdMessage = ' (Threshold=' + d.thresholdValue + '%).';
                     }
-                    return d.checkDescription + thresholdMessage;
+                    return getCheckDescription(d) + thresholdMessage;
                 }, title: "DESCRIPTION", className: "description", width: "29%"
             },
             { data: function (d) { return d.pctViolatedRows ? (d.pctViolatedRows * 100).toFixed(2) + '%' : '0%' }, title: "%&nbsp;RECORDS", type: "num-fmt", className: 'dt-body-right', orderable: true, width: "8%" }

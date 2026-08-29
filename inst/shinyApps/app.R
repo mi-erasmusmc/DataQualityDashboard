@@ -65,7 +65,7 @@ server <- function(input, output, session) {
     
     if (!('severity' %in% names(results$CheckResults))) {
       tryCatch({
-        # Read checkDescription to get severity status for each check
+        # Read check descriptions to backfill severity without clobbering result fields
         cdmVersion <- results$Metadata$cdmVersion
         checkDescriptionsDf <- readr::read_csv(
           file = system.file(
@@ -74,7 +74,8 @@ server <- function(input, output, session) {
             package = "DataQualityDashboard"
           ),
           show_col_types = FALSE
-        )
+        ) |>
+          dplyr::select(checkLevel, checkName, severity)
 
         results$CheckResults <- results$CheckResults |>
           dplyr::left_join(
