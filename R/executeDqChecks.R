@@ -193,6 +193,11 @@ executeDqChecks <- function(connectionDetails,
   ParallelLogger::registerLogger(logger = logger)
   on.exit(ParallelLogger::unregisterLogger("DqDashboard", silent = TRUE), add = TRUE)
 
+  ParallelLogger::logInfo(sprintf(
+    "Running DataQualityDashboard %s",
+    metadata$dqdVersion
+  ))
+
   # load Threshold CSVs ----------------------------------------------------------------------------------------
 
   startTime <- Sys.time()

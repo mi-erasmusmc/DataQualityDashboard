@@ -51,6 +51,9 @@
           <a class="nav-link js-scroll-trigger" href="#sqlite-query">SQLite Query</a>
         </li>
         <li class="nav-item">
+          <a class="nav-link js-scroll-trigger" href="#extra-vis">Extra Visualisations</a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link js-scroll-trigger" href="#about">About</a>
         </li>
       </ul>
@@ -92,21 +95,27 @@
         <h2 class="mb-5">SQLite Query</h2>
         <p>Run ad hoc SQL against a SQLite database file and inspect the returned rows below.</p>
         {{sqliteQueryUi}}
-        <div style="margin-top: 2rem;">
-          <dq-dashboard-severity></dq-dashboard-severity>
-        </div>
       </div>
     </section>
 
-    {{compareResultsSectionUi}}
-
-    <section class="resume-section p-3 p-lg-5" id="concept-coverage">
+    <section class="resume-section p-3 p-lg-5" id="extra-vis">
+      <h2 class="mb-5">Extra Visualisations</h2>
       <div class="w-100">
-        <h2 class="mb-4">Concept Coverage</h2>
+        <h3 class="mb-4">Results by Severity</h3>
+        <p>Failing checks by severity</p>
+        <dq-dashboard-severity></dq-dashboard-severity>
+      </div>
+      
+      <div class="w-100">
+        <!-- <h3 class="mb-4">Compare DQD results</h3> -->
+        <!-- <p>Plot of the violating percentage for both provided checks for all checks with a different violating percentage.</p> -->
+        {{compareResultsSectionUi}}
+      </div>
+
+      <div class="w-100">
+        <h3 class="mb-4">Concept Coverage</h3>
         <p>Coverage of source terms and records mapped to standard concepts across the primary OMOP domains.</p>
-        <div id="conceptCoverageCollapse">
-          {{conceptCoverageUi}}
-        </div>
+        {{conceptCoverageUi}}
       </div>
     </section>
 

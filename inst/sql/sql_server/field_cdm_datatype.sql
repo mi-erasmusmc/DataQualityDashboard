@@ -31,7 +31,7 @@ FROM
 			cdmTable.* 
 		FROM @schema.@cdmTableName cdmTable
 		WHERE CASE WHEN 
-        CAST(CAST(cdmTable.@cdmFieldName AS numeric) AS char) = RTRIM(CAST(cdmTable.@cdmFieldName AS char), '0.') OR CAST(cdmTable.@cdmFieldName AS char) = '0'
+        CAST(CAST(cdmTable.@cdmFieldName AS numeric) AS char) = CAST(cdmTable.@cdmFieldName AS char)
         THEN 0
         ELSE 1
       END
