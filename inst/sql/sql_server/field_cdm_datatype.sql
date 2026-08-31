@@ -30,7 +30,11 @@ FROM
 			'@cdmTableName.@cdmFieldName' AS violating_field, 
 			cdmTable.* 
 		FROM @schema.@cdmTableName cdmTable
-		WHERE cdmTable.@cdmFieldName / cdmTable.@cdmFieldName = 1
+		WHERE CASE WHEN 
+        CAST(CAST(cdmTable.@cdmFieldName AS numeric) AS char) = RTRIM(CAST(cdmTable.@cdmFieldName AS char), '0.') OR CAST(cdmTable.@cdmFieldName AS char) = '0'
+        THEN 0
+        ELSE 1
+      END
 			AND cdmTable.@cdmFieldName IS NOT NULL
 		/*violatedRowsEnd*/
 	) violated_rows
