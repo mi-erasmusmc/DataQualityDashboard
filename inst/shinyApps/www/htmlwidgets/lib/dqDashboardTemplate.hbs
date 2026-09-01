@@ -110,19 +110,21 @@
     <table>
         <thead>
             <tr>
-                <td>Severity</td>
-                {{#each SeverityTableSummary.columns}}
-                <td>{{this}}</td>
-                {{/each}}
+                <td>Table</td>
+                <td>Fatal</td>
+                <td>Convention</td>
+                <td>Characterization</td>
+                <td>Total</td>
             </tr>
         </thead>
         <tbody>
             {{#each SeverityTableSummary.rows}}
             <tr>
-                <td class="dimension">{{severity}}</td>
-                {{#each counts}}
-                <td>{{this}}</td>
-                {{/each}}
+                <td class="dimension">{{cdmTableName}}</td>
+                <td>{{Fatal}}</td>
+                <td>{{Convention}}</td>
+                <td>{{Characterization}}</td>
+                <td>{{Total}}</td>
             </tr>
             {{/each}}
         </tbody>

@@ -5,7 +5,6 @@ const formatSeverityLabel = value => {
   const severity = formatDimensionValue(value);
   return severity === "None" ? severity : severity.charAt(0).toUpperCase() + severity.slice(1);
 };
-const severityLabels = ["Fatal", "Convention", "Characterization"];
 
 function buildSeverityTableSummary(results) {
   const severityTableCounts = results.reduce((summaryRows, check) => {
@@ -29,44 +28,26 @@ function buildSeverityTableSummary(results) {
     return summaryRows;
   }, {});
 
-  const columns = Object.values(severityTableCounts)
+  const rows = Object.values(severityTableCounts)
+    .map(row => ({
+      cdmTableName: row.cdmTableName,
+      Fatal: row.Fatal,
+      Convention: row.Convention,
+      Characterization: row.Characterization,
+      None: row.None,
+      Total: row.Fatal + row.Convention + row.Characterization + row.None
+    }))
+    .filter(row => row.Total > 0)
     .sort((left, right) => {
-      const leftSeverityTotal =
-        left.Fatal +
-        left.Convention +
-        left.Characterization +
-        left.None;
-      const rightSeverityTotal =
-        right.Fatal +
-        right.Convention +
-        right.Characterization +
-        right.None;
-
-      if (leftSeverityTotal !== rightSeverityTotal) {
-        return rightSeverityTotal - leftSeverityTotal;
+      if (left.Total !== right.Total) {
+        return right.Total - left.Total;
       }
 
       return left.cdmTableName.localeCompare(right.cdmTableName);
-    })
-    .map(row => row.cdmTableName);
+    });
 
   return {
-    columns: columns,
-    rows: [
-      ...severityLabels.map(severity => ({
-        severity: severity,
-        counts: columns.map(tableName => severityTableCounts[tableName][severity])
-      })),
-      {
-        severity: "Total",
-        counts: columns.map(tableName =>
-          severityTableCounts[tableName].Fatal +
-          severityTableCounts[tableName].Convention +
-          severityTableCounts[tableName].Characterization +
-          severityTableCounts[tableName].None
-        )
-      }
-    ]
+    rows: rows
   };
 }
 
@@ -620,25 +601,30 @@ class DqDashboardSeverity extends HTMLElement {
     <table>
       <thead>
         <tr>
-          <td>Severity</td>
-          {{#each columns}}
-          <td>{{this}}</td>
-          {{/each}}
+          <td>Table</td>
+          <td>Fatal</td>
+          <td>Convention</td>
+          <td>Characterization</td>
+          <td>Total</td>
         </tr>
       </thead>
       <tbody>
         {{#if rows.length}}
           {{#each rows}}
           <tr>
-            <td class="dimension">{{severity}}</td>
-            {{#each counts}}
-            <td {{#if this}}class="fail"{{/if}}>{{this}}</td>
-            {{/each}}
+            <td class="dimension">{{cdmTableName}}</td>
+            <td {{#if Fatal}}class="fail"{{/if}}>{{Fatal}}</td>
+            <td {{#if Convention}}class="fail"{{/if}}>{{Convention}}</td>
+            <td {{#if Characterization}}class="fail"{{/if}}>{{Characterization}}</td>
+            <td {{#if Total}}class="fail"{{/if}}>{{Total}}</td>
           </tr>
           {{/each}}
         {{else}}
           <tr>
             <td class="dimension">None</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
             <td>0</td>
           </tr>
         {{/if}}

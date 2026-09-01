@@ -66,27 +66,30 @@
         }
     },
     "SeverityTableSummary": {
-        "columns": [
-            "PERSON",
-            "VISIT_OCCURRENCE",
-            "MEASUREMENT"
-        ],
         "rows": [
             {
-                "severity": "Fatal",
-                "counts": [3, 0, 0]
+                "cdmTableName": "PERSON",
+                "Fatal": 3,
+                "Convention": 1,
+                "Characterization": 0,
+                "None": 0,
+                "Total": 4
             },
             {
-                "severity": "Convention",
-                "counts": [1, 2, 0]
+                "cdmTableName": "MEASUREMENT",
+                "Fatal": 0,
+                "Convention": 0,
+                "Characterization": 4,
+                "None": 1,
+                "Total": 5
             },
             {
-                "severity": "Characterization",
-                "counts": [0, 1, 4]
-            },
-            {
-                "severity": "None",
-                "counts": [0, 0, 1]
+                "cdmTableName": "VISIT_OCCURRENCE",
+                "Fatal": 0,
+                "Convention": 2,
+                "Characterization": 1,
+                "None": 0,
+                "Total": 3
             }
         ]
     }
