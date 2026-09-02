@@ -3,7 +3,7 @@
 
 library(tidyverse)
 
-in_path <- "inst/csv"
+in_path <- "/Users/maxim/Develop/OHDSI/DataQualityDashboard/inst/csv"
 out_path <- "extras/thresholdsLongFormat"
 version <- "5.4"
 tableLevelThreshold <- sprintf("OMOP_CDMv%s_Table_Level.csv", version)
@@ -69,6 +69,12 @@ tableLevelChecks <- checkValue %>%
     Threshold,
     checkParameter = checkValue,
     Notes
+  )
+
+# Filter out the isRequired, which is not a table level check
+tableLevelChecks <- tableLevelChecks %>%
+  filter(
+    checkName != 'isRequired'
   )
 
 # Add cdmTable, which is implicit in wide threshold file
@@ -166,6 +172,12 @@ fieldLevelChecks <- checkValue %>%
     checkParameter_TableName = TableName,
     checkParameter_FieldName = FieldName,
     Notes
+  )
+
+# Remove cdmDatatype checks that are not integer
+fieldLevelChecks <- fieldLevelChecks %>%
+  filter(
+    !(checkName == 'cdmDataType' & checkParameter != 'integer')
   )
 
 # Add cdmField, which is implicit in wide threshold file
@@ -310,16 +322,25 @@ checkDescriptions <- read.csv(
   stringsAsFactors = F
 )
 
-df <- bind_rows(tableLevelChecks, fieldLevelChecks, conceptLevelChecks) %>%
+df <- bind_rows(
+    tableLevelChecks |> mutate(checkLevel = 'TABLE'),
+    fieldLevelChecks |> mutate(checkLevel = 'FIELD'),
+    conceptLevelChecks |> mutate(checkLevel = 'CONCEPT')
+  ) |>
   left_join(
     checkDescriptions,
-    by = join_by(checkName)
+    by = join_by(checkLevel, checkName)
   ) 
 
 checkCounts <- df |>
   filter(
-    !is.na(checkLevel),
-    !checkName %in% c('plausibleTemporalAfter', 'plausibleDuringLife', 'plausibleGender')
+    !(
+      is.na(kahnContext) | # The more obscure isTemporallyConstant, validPrevalenceLow, validPrevalenceHigh
+      checkName %in% c('plausibleTemporalAfter', 'plausibleDuringLife', 'plausibleGender') |
+      (checkName == 'cdmDatatype' & checkParameter != 'integer') |
+      (checkName == 'plausibleValueLow' & checkLevel == 'CONCEPT') |
+      (checkName == 'plausibleValueHigh' & checkLevel == 'CONCEPT')
+    )
   ) |>
   summarise(
     n_checks = n_distinct(checkName),
