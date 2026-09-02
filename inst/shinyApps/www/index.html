@@ -102,7 +102,6 @@
       <h2 class="mb-5">Extra Visualisations</h2>
       <div class="w-100">
         <h3 class="mb-4">Results by Severity</h3>
-        <p>Failing checks by severity</p>
         <dq-dashboard-severity></dq-dashboard-severity>
       </div>
       
@@ -116,6 +115,12 @@
         <h3 class="mb-4">Concept Coverage</h3>
         <p>Coverage of source terms and records mapped to standard concepts across the primary OMOP domains.</p>
         {{conceptCoverageUi}}
+      </div>
+
+      <div class="w-100">
+        <h3 class="mb-4">Query Performance</h3>
+        <p>Execution time summary by check name across all loaded check results.</p>
+        {{queryPerformanceUi}}
       </div>
     </section>
 

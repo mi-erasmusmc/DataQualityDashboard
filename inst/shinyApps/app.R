@@ -58,7 +58,135 @@ buildSqliteResultsTable <- function(data) {
   )
 }
 
+parseExecutionTimeSeconds <- function(executionTime) {
+  unitMultipliers <- c(
+    secs = 1,
+    mins = 60,
+    hours = 3600,
+    days = 86400
+  )
+
+  vapply(executionTime, function(value) {
+    if (is.null(value) || length(value) == 0 || is.na(value) || !nzchar(trimws(as.character(value)))) {
+      return(NA_real_)
+    }
+
+    matches <- regexec("^\\s*([0-9]*\\.?[0-9]+)\\s*([A-Za-z]+)\\s*$", as.character(value))
+    captureGroups <- regmatches(as.character(value), matches)[[1]]
+
+    if (length(captureGroups) != 3) {
+      return(NA_real_)
+    }
+
+    numericValue <- suppressWarnings(as.numeric(captureGroups[2]))
+    timeUnit <- tolower(captureGroups[3])
+    multiplier <- unitMultipliers[[timeUnit]]
+
+    if (is.na(numericValue) || is.null(multiplier)) {
+      return(NA_real_)
+    }
+
+    numericValue * multiplier
+  }, FUN.VALUE = numeric(1))
+}
+
+buildQueryPerformanceSummary <- function(checkResults) {
+  if (is.list(checkResults) && !is.data.frame(checkResults)) {
+    checkResults <- dplyr::bind_rows(lapply(checkResults, function(checkResult) {
+      checkResult[sapply(checkResult, is.null)] <- NA
+      as.data.frame(checkResult, stringsAsFactors = FALSE)
+    }))
+  }
+
+  if (!is.data.frame(checkResults) || nrow(checkResults) == 0 || !("checkName" %in% names(checkResults))) {
+    return(data.frame(
+      `Check Name` = character(0),
+      `Check Results` = integer(0),
+      `Total Time (s)` = numeric(0),
+      `Average Time (s)` = numeric(0),
+      `Std Dev (s)` = numeric(0),
+      stringsAsFactors = FALSE,
+      check.names = FALSE
+    ))
+  }
+
+  executionTimeSeconds <- if ("executionTimeSeconds" %in% names(checkResults)) {
+    suppressWarnings(as.numeric(checkResults$executionTimeSeconds))
+  } else {
+    parseExecutionTimeSeconds(checkResults$executionTime)
+  }
+
+  summaryInput <- data.frame(
+    checkName = as.character(checkResults$checkName),
+    executionTimeSeconds = executionTimeSeconds,
+    stringsAsFactors = FALSE
+  )
+  summaryInput <- summaryInput[!is.na(summaryInput$checkName) & nzchar(summaryInput$checkName), , drop = FALSE]
+
+  if (nrow(summaryInput) == 0) {
+    return(data.frame(
+      `Check Name` = character(0),
+      `Check Results` = integer(0),
+      `Total Time (s)` = numeric(0),
+      `Average Time (s)` = numeric(0),
+      `Std Dev (s)` = numeric(0),
+      stringsAsFactors = FALSE,
+      check.names = FALSE
+    ))
+  }
+
+  splitByCheck <- split(summaryInput$executionTimeSeconds, summaryInput$checkName)
+
+  summaryRows <- lapply(names(splitByCheck), function(checkName) {
+    times <- splitByCheck[[checkName]]
+    validTimes <- times[!is.na(times)]
+
+    data.frame(
+      `Check Name` = checkName,
+      `Check Results` = length(times),
+      `Total Time (s)` = if (length(validTimes) > 0) sum(validTimes) else NA_real_,
+      `Average Time (s)` = if (length(validTimes) > 0) mean(validTimes) else NA_real_,
+      `Std Dev (s)` = if (length(validTimes) > 1) stats::sd(validTimes) else 0,
+      stringsAsFactors = FALSE,
+      check.names = FALSE
+    )
+  })
+
+  summaryTable <- do.call(rbind, summaryRows)
+  totalTimeSortKey <- suppressWarnings(as.numeric(summaryTable[["Total Time (s)"]]))
+  totalTimeSortKey[is.na(totalTimeSortKey)] <- -Inf
+  summaryTable <- summaryTable[order(-totalTimeSortKey, summaryTable[["Check Name"]]), , drop = FALSE]
+
+  allValidTimes <- summaryInput$executionTimeSeconds[!is.na(summaryInput$executionTimeSeconds)]
+  totalRow <- data.frame(
+    `Check Name` = "Total",
+    `Check Results` = nrow(summaryInput),
+    `Total Time (s)` = if (length(allValidTimes) > 0) sum(allValidTimes) else NA_real_,
+    `Average Time (s)` = if (length(allValidTimes) > 0) mean(allValidTimes) else NA_real_,
+    `Std Dev (s)` = if (length(allValidTimes) > 1) stats::sd(allValidTimes) else 0,
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+  )
+
+  rbind(summaryTable, totalRow)
+}
+
+formatQueryPerformanceSummary <- function(summaryTable) {
+  if (!is.data.frame(summaryTable) || nrow(summaryTable) == 0) {
+    return(summaryTable)
+  }
+
+  numericColumns <- c("Total Time (s)", "Average Time (s)", "Std Dev (s)")
+  summaryTable[numericColumns] <- lapply(summaryTable[numericColumns], function(column) {
+    ifelse(is.na(column), "N/A", format(round(column, 2), nsmall = 2, trim = TRUE))
+  })
+
+  summaryTable
+}
+
 server <- function(input, output, session) {
+  currentResults <- shiny::reactiveVal(NULL)
+
   observe({
     jsonPath <- Sys.getenv("jsonPath")
     results <- DataQualityDashboard::convertJsonResultsFileCase(jsonPath, writeToFile = FALSE, targetCase = "camel")
@@ -90,7 +218,8 @@ server <- function(input, output, session) {
     results$appVersion <- as.character(packageVersion('DataQualityDashboard'))
     
     # Fix json formatting
-    results <- jsonlite::parse_json(jsonlite::toJSON(results))    
+    currentResults(results)
+    results <- jsonlite::parse_json(jsonlite::toJSON(results))
 
     session$sendCustomMessage("results", results)
   })
@@ -124,6 +253,25 @@ server <- function(input, output, session) {
     height = 720,
     res = 96
   )
+
+  output$query_performance_ui <- renderUI({
+    results <- currentResults()
+
+    if (is.null(results) || is.null(results$CheckResults)) {
+      return(tags$p("Query performance summary unavailable."))
+    }
+
+    summaryTable <- buildQueryPerformanceSummary(results$CheckResults)
+
+    if (nrow(summaryTable) == 0) {
+      return(tags$p("No query performance results available."))
+    }
+
+    tags$div(
+      class = "table-responsive",
+      buildSqliteResultsTable(formatQueryPerformanceSummary(summaryTable))
+    )
+  })
 
   output$compare_results_section_ui <- renderUI({
     compareJsonPath <- Sys.getenv("compareJsonPath")
@@ -311,6 +459,7 @@ ui <- fluidPage(
       class = "concept-coverage-panel",
       plotOutput("concept_coverage_plot")
     ),
+    queryPerformanceUi = uiOutput("query_performance_ui"),
     sqliteQueryUi = tags$div(
       class = "sqlite-query-panel",
       textInput(
@@ -341,6 +490,10 @@ ui <- fluidPage(
 
       .sqlite-query-panel .form-group {
         margin-bottom: 1.5rem;
+      }
+
+      #extra-vis .w-100 + .w-100 {
+        margin-top: 2rem;
       }
     "))
   )
