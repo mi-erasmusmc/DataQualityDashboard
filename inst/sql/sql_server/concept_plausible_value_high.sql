@@ -4,7 +4,7 @@ CONCEPT LEVEL check:
 PLAUSIBLE_VALUE_HIGH - find any MEASUREMENT records that have VALUE_AS_NUMBER with non-null value > plausible high value
 
 Parameters used in this template:
-schema = @cdmDatabaseSchema
+cdmDatabaseSchema = @cdmDatabaseSchema
 cdmTableName = @cdmTableName
 cdmFieldName = @cdmFieldName
 conceptId = @conceptId

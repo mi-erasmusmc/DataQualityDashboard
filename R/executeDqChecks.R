@@ -137,7 +137,7 @@ executeDqChecks <- function(connectionDetails,
       cdmDatabaseSchema = cdmDatabaseSchema
     )
     sql <- SqlRender::translate(sql = sql, targetDialect = connectionDetails$dbms)
-    metadata <- DatabaseConnector::querySql(connection = connection, sql = sql, snakeCaseToCamelCase = TRUE)
+    suppressWarnings(metadata <- DatabaseConnector::querySql(connection = connection, sql = sql, snakeCaseToCamelCase = TRUE))
     if (nrow(metadata) < 1) {
       stop("Please populate the cdm_source table before executing data quality checks.")
     }
@@ -207,7 +207,8 @@ executeDqChecks <- function(connectionDetails,
       "csv",
       sprintf("OMOP_CDMv%s_Check_Descriptions.csv", cdmVersion),
       package = "DataQualityDashboard"
-    )
+    ),
+    show_col_types = FALSE
   )
   checkDescriptionsDf <- as.data.frame(checkDescriptionsDf)
 
