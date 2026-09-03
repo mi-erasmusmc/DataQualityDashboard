@@ -41,7 +41,7 @@ FROM
             }
         JOIN @cdmDatabaseSchema.death de 
             ON cdmTable.person_id = de.person_id
-        WHERE CAST(cdmTable.@cdmFieldName AS DATE) > DATEADD(day, 60, CAST(de.death_date AS DATE))
+        WHERE cdmTable.@cdmFieldName > de.death_date
         /*violatedRowsEnd*/
     ) violated_rows
 ) violated_row_count,

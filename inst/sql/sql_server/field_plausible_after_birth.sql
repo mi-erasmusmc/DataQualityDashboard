@@ -43,20 +43,7 @@ FROM
         JOIN @cdmDatabaseSchema.person p 
             ON cdmTable.person_id = p.person_id
         WHERE cdmTable.@cdmFieldName IS NOT NULL AND 
-            CAST(cdmTable.@cdmFieldName AS DATE) < COALESCE(
-                CAST(p.birth_datetime AS DATE), 
-                CAST(CONCAT(
-                    p.year_of_birth,
-                    COALESCE(
-                        RIGHT('0' + CAST(p.month_of_birth AS VARCHAR), 2),
-                        '01'
-                    ),
-                    COALESCE(
-                        RIGHT('0' + CAST(p.day_of_birth AS VARCHAR), 2),
-                        '01'
-                    )
-                ) AS DATE)
-            )
+            cdmTable.@cdmFieldName + 0 < p.year_of_birth
         /*violatedRowsEnd*/
     ) violated_rows
 ) violated_row_count,

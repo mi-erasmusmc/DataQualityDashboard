@@ -36,7 +36,7 @@ FROM (
                 AND c.cohort_definition_id = @cohortDefinitionId
         }
         {@cdmDatatype == "datetime" | @cdmDatatype == "date"}?{
-            WHERE CAST(cdmTable.@cdmFieldName AS DATE) < CAST(@plausibleValueLow AS DATE)
+            WHERE cdmTable.@cdmFieldName < @plausibleValueLow
         }:{
             WHERE cdmTable.@cdmFieldName < @plausibleValueLow
         }

@@ -41,7 +41,7 @@ FROM
         }
         WHERE cdmTable.@cdmFieldName IS NOT NULL 
             AND cdmTable.@plausibleStartBeforeEndFieldName IS NOT NULL 
-            AND CAST(cdmTable.@cdmFieldName AS DATE) > CAST(cdmTable.@plausibleStartBeforeEndFieldName AS DATE)
+            AND cdmTable.@cdmFieldName > cdmTable.@plausibleStartBeforeEndFieldName
         /*violatedRowsEnd*/
     ) violated_rows
 ) violated_row_count,
