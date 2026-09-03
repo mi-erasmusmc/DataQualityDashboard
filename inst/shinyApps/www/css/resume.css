@@ -44,6 +44,16 @@ table.dataTable thead th,table.dataTable thead td{
   min-width: 24px;
 }
 
+.dtDetails {
+  width: 100%;
+}
+
+.dtDetails td:first-child {
+  width: 11rem;
+  min-width: 11rem;
+  white-space: nowrap;
+}
+
 td {
   vertical-align: top;
   font-size:14px;
