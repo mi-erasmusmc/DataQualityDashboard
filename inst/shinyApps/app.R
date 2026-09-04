@@ -268,7 +268,7 @@ server <- function(input, output, session) {
     }
 
     tags$div(
-      class = "table-responsive",
+      class = "table-responsive query-performance-panel",
       buildSqliteResultsTable(formatQueryPerformanceSummary(summaryTable))
     )
   })
@@ -492,8 +492,30 @@ ui <- fluidPage(
         margin-bottom: 1.5rem;
       }
 
+      #extra-vis .w-100 {
+        clear: both;
+      }
+
       #extra-vis .w-100 + .w-100 {
         margin-top: 2rem;
+      }
+
+      .concept-coverage-panel,
+      .query-performance-panel {
+        max-width: 100%;
+        overflow-x: auto;
+      }
+
+      .query-performance-panel table {
+        width: 100%;
+        table-layout: fixed;
+      }
+
+      .query-performance-panel th,
+      .query-performance-panel td {
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: break-word;
       }
     "))
   )
