@@ -7,24 +7,22 @@
 #' @author Elena Garcia Lara
 #' @author Maxim Moinat
 #' 
-#' @return A figure to visualize concept mapping coverage per domain
+#' @return A figure to visualize concept mapping coverage per domain, or NULL when no coverage data is available
 #' @export
 #' 
 #' @examples 
 #' \dontrun{
 #'   plotConceptCoverage("dqd_results.json")
 #' }
-plotConceptCoverage <- function(jsonPath){
-  coverage_results <- .getCoverageResults(jsonPath)
+plotConceptCoverage <- function(jsonPath, domains = c("VISIT", "PROCEDURE", "DRUG", "CONDITION", "MEASUREMENT", "OBSERVATION", "MEAS-UNIT", "OBS-UNIT")) {
+  coverage_results <- .getCoverageResults(jsonPath, domains)
+
+  if (is.null(coverage_results)) {
+    return(NULL)
+  }
   
   # Barplot styled after EHDEN DoA
   p <- coverage_results %>%
-    # To keep things simple, we only look at the six main domains and units
-    filter(
-      domainField %in% c("VISIT", "PROCEDURE", "DRUG", "CONDITION", "MEASUREMENT", 
-                         "OBSERVATION", "MEAS-UNIT", "OBS-UNIT"),
-      NUM_DENOMINATOR_ROWS > 0
-    ) %>%
     ggplot(aes(x=coverageType, y = mappingCoverage, fill = coverageType)) +
     geom_col() +
     geom_text(
@@ -81,10 +79,30 @@ tableConceptCoverage <- function(jsonPath){
   return(table)
 }
 
-.getCoverageResults <- function(jsonPath) {
+.getCoverageResults <- function(jsonPath, domains) {
   result <- convertJsonResultsFileCase(jsonPath, writeToFile = FALSE, targetCase = 'snake')
-  
-  result$CheckResults %>%
+
+  if (!is.list(result) ||
+      is.null(result$CheckResults) ||
+      !is.data.frame(result$CheckResults) ||
+      nrow(result$CheckResults) == 0) {
+    return(NULL)
+  }
+
+  requiredColumns <- c(
+    "CHECK_NAME",
+    "CDM_TABLE_NAME",
+    "CDM_FIELD_NAME",
+    "PCT_VIOLATED_ROWS",
+    "NUM_DENOMINATOR_ROWS",
+    "NUM_VIOLATED_ROWS"
+  )
+
+  if (!all(requiredColumns %in% names(result$CheckResults))) {
+    return(NULL)
+  }
+
+  coverageResults <- result$CheckResults %>%
     dplyr::filter(CHECK_NAME %in% c("standardConceptRecordCompleteness", "sourceValueCompleteness")) %>%
     # Not interested in eras as these are all derived
     dplyr::filter(!(CDM_TABLE_NAME %in% c("DRUG_ERA", "DOSE_ERA", "CONDITION_ERA"))) %>%
@@ -114,9 +132,19 @@ tableConceptCoverage <- function(jsonPath){
         "SPECIMEN" ~ "SPEC"
       ),
       domainField = ifelse(
-        domain == variable,
+      domain == variable,
         domain,
         paste0(domain_abbrev,"-",variable)
       )
+    ) %>%
+    dplyr::filter(
+      domainField %in% domains,
+      NUM_DENOMINATOR_ROWS > 0
     )
+
+  if (nrow(coverageResults) == 0) {
+    return(NULL)
+  }
+
+  coverageResults
 }

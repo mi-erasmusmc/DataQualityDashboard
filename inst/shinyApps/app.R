@@ -230,29 +230,47 @@ server <- function(input, output, session) {
     message = "Enter a SQLite file path and SQL query, then click Execute."
   ))
 
-  output$concept_coverage_plot <- renderPlot(
-    {
-      tryCatch(
-        {
-          DataQualityDashboard::plotConceptCoverage(Sys.getenv("jsonPath"))
-        },
-        error = function(error) {
-          plot.new()
-          text(
-            0.5,
-            0.5,
-            labels = paste(
-              "Concept coverage plot unavailable.",
-              conditionMessage(error)
-            ),
-            cex = 1
-          )
-        }
-      )
-    },
-    height = 720,
-    res = 96
-  )
+  conceptCoveragePlot <- shiny::reactive({
+    tryCatch(
+      DataQualityDashboard::plotConceptCoverage(Sys.getenv("jsonPath")),
+      error = function(error) {
+        structure(
+          list(message = conditionMessage(error)),
+          class = "coverage_plot_error"
+        )
+      }
+    )
+  })
+
+  output$concept_coverage_ui <- renderUI({
+    coveragePlot <- conceptCoveragePlot()
+
+    if (inherits(coveragePlot, "coverage_plot_error")) {
+      return(tags$div(
+        class = "alert alert-warning",
+        paste("Concept coverage plot unavailable.", coveragePlot$message)
+      ))
+    }
+
+    if (is.null(coveragePlot)) {
+      return(tags$div(
+        class = "alert alert-info",
+        "Concept coverage data unavailable for this results file."
+      ))
+    }
+
+    tags$div(
+      class = "concept-coverage-panel",
+      plotOutput("concept_coverage_plot")
+    )
+  })
+
+  output$concept_coverage_plot <- renderPlot({
+    coveragePlot <- conceptCoveragePlot()
+    req(!inherits(coveragePlot, "coverage_plot_error"))
+    req(!is.null(coveragePlot))
+    coveragePlot
+  }, height = 720, res = 96)
 
   output$query_performance_ui <- renderUI({
     results <- currentResults()
@@ -455,10 +473,7 @@ ui <- fluidPage(
   shiny::htmlTemplate(
     filename = "www/index.html",
     compareResultsSectionUi = uiOutput("compare_results_section_ui"),
-    conceptCoverageUi = tags$div(
-      class = "concept-coverage-panel",
-      plotOutput("concept_coverage_plot")
-    ),
+    conceptCoverageUi = uiOutput("concept_coverage_ui"),
     queryPerformanceUi = uiOutput("query_performance_ui"),
     sqliteQueryUi = tags$div(
       class = "sqlite-query-panel",
