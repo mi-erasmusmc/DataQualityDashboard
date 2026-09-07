@@ -203,7 +203,13 @@ server <- function(input, output, session) {
           ),
           show_col_types = FALSE
         ) |>
-          dplyr::select(checkLevel, checkName, severity)
+          dplyr::select(checkLevel, checkName, severity) |> 
+          # add missing severities
+          rbind(
+             c('CONCEPT', 'plausibleGender', 'characterization')
+            ,c('FIELD', 'plausibleTemporalAfter', 'characterization')
+            ,c('FIELD', 'plausibleDuringLife', 'characterization')
+          )
 
         results$CheckResults <- results$CheckResults |>
           dplyr::left_join(
